@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'optparse'
+require 'unity'
+
+orig_args = ARGV.dup
+command = ARGV.shift
+
+case command
+when 'console', 'c'
+  ENV['C9_CONSOLE'] = '1'
+  require_relative "#{Dir.pwd}/config/boot.rb"
+  require 'pry'
+
+  def reload!
+    exec '/usr/bin/env', 'bundle', 'exec', 'tkp', 'console'
+  end
+
+  Pry.start
+when 'runner', 'r'
+  require_relative "#{Dir.pwd}/config/boot.rb"
+
+  load ARGV.shift
+when 'server', 's'
+  options = { reload: false }
+  OptionParser.new do |opts|
+    opts.on('-r', '--reload', 'Auto-reload when file changes') do
+      options[:reload] = true
+    end
+  end.parse!
+
+  if options[:reload] == true
+    exec '/usr/bin/env', 'bundle', 'exec', 'rerun', 'bundle exec puma'
+  else
+    exec '/usr/bin/env', 'bundle', 'exec', 'puma'
+  end
+else
+  exec '/usr/bin/env', 'bundle', 'exec', 'rake', '--rakefile', "#{Dir.pwd}/Rakefile", *orig_args
+end

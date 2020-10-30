@@ -1,0 +1,67 @@
+PATH
+  remote: .
+  specs:
+    tikt-application (1.0.4)
+      connection_pool (~> 2.2)
+      http (~> 4.4)
+      symbol-fstring
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.7.0)
+      public_suffix (>= 2.0.2, < 5.0)
+    connection_pool (2.2.3)
+    diff-lcs (1.4.4)
+    domain_name (0.5.20190701)
+      unf (>= 0.0.5, < 1.0.0)
+    ffi (1.13.1)
+    ffi-compiler (1.0.1)
+      ffi (>= 1.0.0)
+      rake
+    http (4.4.1)
+      addressable (~> 2.3)
+      http-cookie (~> 1.0)
+      http-form_data (~> 2.2)
+      http-parser (~> 1.2.0)
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
+    http-form_data (2.3.0)
+    http-parser (1.2.1)
+      ffi-compiler (>= 1.0, < 2.0)
+    nio4r (2.5.4)
+    public_suffix (4.0.6)
+    puma (5.0.2)
+      nio4r (~> 2.0)
+    rack (2.2.3)
+    rake (12.3.3)
+    rspec (3.9.0)
+      rspec-core (~> 3.9.0)
+      rspec-expectations (~> 3.9.0)
+      rspec-mocks (~> 3.9.0)
+    rspec-core (3.9.2)
+      rspec-support (~> 3.9.3)
+    rspec-expectations (3.9.2)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.9.0)
+    rspec-mocks (3.9.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.9.0)
+    rspec-support (3.9.3)
+    symbol-fstring (1.0.0)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  puma
+  rack
+  rake (~> 12.0)
+  rspec (~> 3.0)
+  tikt-application!
+
+BUNDLED WITH
+   2.1.4
