@@ -2,6 +2,7 @@ require 'logger'
 require 'ostruct'
 require 'json'
 require 'time'
+require 'singleton'
 require 'dotenv/load'
 require 'http'
 require 'connection_pool'
@@ -20,6 +21,10 @@ require 'unity/event_emitter'
 require 'unity/operation'
 require 'unity/operation_context'
 require 'unity/operation_policy'
+
+# utils
+require 'unity/utils/dynamo_service'
+require 'unity/utils/redis_service'
 
 module Unity
   def app_class=(klass)

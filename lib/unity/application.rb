@@ -141,17 +141,17 @@ module Unity
       [
         200,
         { 'content-type' => 'application/json' },
-        [JSON.dump(operation.call(operation_input))]
+        [operation.call(operation_input).to_json]
       ]
     rescue Unity::Authentication::Error => e
-      [e.code, { 'content-type' => 'application/json' }, [JSON.dump(e.as_json)]]
+      [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
     rescue Unity::Operation::OperationError => e
       logger&.error(
         'message' => e.message,
         'data' => e.data,
         'operation_input' => operation_input
       )
-      [400, { 'content-type' => 'application/json' }, [JSON.dump(e.as_json)]]
+      [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
     end
 
     private
