@@ -3,8 +3,14 @@ module Unity
     class DynamoService
       include Singleton
 
-      def scan(params)
-        @connection_pool.with { |conn| conn.scan(params) }
+      def method_missing(method_name, *args, &block)
+        @connection_pool.with do |conn|
+          conn.__send__(method_name, *args, &block)
+        end
+      end
+
+      def respond_to_missing?(method_name, include_private = false)
+        true
       end
 
       protected

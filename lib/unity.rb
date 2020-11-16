@@ -27,25 +27,39 @@ require 'unity/utils/dynamo_service'
 require 'unity/utils/redis_service'
 
 module Unity
-  def app_class=(klass)
+  def self.app_class=(klass)
     @app_class = klass
   end
 
-  def app_class
+  def self.app_class
     @app_class
   end
 
-  def application
+  def self.application
     @application ||= app_class.instance
   end
 
-  def logger
+  def self.logger
     application.logger
   end
 
-  def logger=(arg)
+  def self.logger=(arg)
     application.logger = arg
   end
 
-  module_function :app_class=, :app_class, :application, :logger, :logger=
+  def self.env=(arg)
+    @env = arg.to_s
+  end
+
+  def self.env
+    @env ||= 'development'
+  end
+
+  def self.environment
+    env
+  end
+
+  def self.environment=(arg)
+    self.env = arg
+  end
 end
