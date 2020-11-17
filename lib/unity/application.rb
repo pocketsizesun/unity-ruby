@@ -152,6 +152,15 @@ module Unity
         'operation_input' => operation_input
       )
       [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
+    rescue => e
+      log = {
+        'message' => 'Exception raised',
+        'exception_message' => e.message,
+        'exception_klass' => e.class.to_s,
+        'exception_backtrace' => e.backtrace
+      }
+      logger&.fatal(log)
+      [500, { 'content-type' => 'application/json' }, [log.to_json]]
     end
 
     private

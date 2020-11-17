@@ -1,4 +1,5 @@
 require 'logger'
+require 'securerandom'
 require 'ostruct'
 require 'json'
 require 'time'
@@ -11,10 +12,10 @@ require 'rack/builder'
 require 'unity/version'
 require 'unity/error'
 require 'unity/urn'
+require 'unity/time_id'
 require 'unity/logger'
 require 'unity/application'
 require 'unity/authentication'
-require 'unity/middleware_stack'
 require 'unity/common_logger'
 require 'unity/event'
 require 'unity/event_emitter'
@@ -24,6 +25,7 @@ require 'unity/operation_policy'
 
 # utils
 require 'unity/utils/dynamo_service'
+require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/redis_service'
 
 module Unity
