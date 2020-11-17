@@ -27,6 +27,7 @@ require 'unity/operation_policy'
 require 'unity/utils/dynamo_service'
 require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/redis_service'
+require 'unity/utils/s3_service'
 
 module Unity
   def self.app_class=(klass)
