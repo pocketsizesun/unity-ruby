@@ -54,7 +54,7 @@ module Unity
   end
 
   def self.env
-    @env ||= 'development'
+    @env ||= ENV.fetch('UNITY_ENV', 'development')
   end
 
   def self.environment
