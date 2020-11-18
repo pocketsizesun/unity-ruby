@@ -17,31 +17,31 @@ module Unity
     end
 
     def self.parse(arg)
-      new(arg.to_s)
+      arg = arg.to_s
+      raise ParseError, "bad URN(is not URN?): #{urn}" unless legal?(arg)
+
+      _scheme, nid, nss = arg.split(':', 3)
+      new(nid, nss)
     end
 
     def self.legal?(urn)
-      urn.match?(REGEX)
+      urn.to_s.match?(REGEX)
     end
 
-    def initialize(urn)
-      unless self.class.legal?(urn)
-        raise ParseError, "bad URN(is not URN?): #{urn}"
-      end
-
-      @urn = urn
-      _scheme, @nid, @nss = urn.split(':', 3)
+    def initialize(nid, nss)
+      @nid = nid
+      @nss = nss
     end
 
     def normalize
       normalized_nid = nid.downcase
       normalized_nss = nss.gsub(/%([0-9a-f]{2})/i) { |hex| hex.downcase }
 
-      self.class.new("urn:#{normalized_nid}:#{normalized_nss}")
+      self.class.parse("urn:#{normalized_nid}:#{normalized_nss}")
     end
 
     def to_s
-      urn
+      "urn:#{nid}:#{nss}"
     end
 
     def match?(other)
@@ -54,7 +54,7 @@ module Unity
         urn_string = other.normalize.to_s
       else
         begin
-          urn_string = self.class.new(other).normalize.to_s
+          urn_string = self.class.parse(other).normalize.to_s
         rescue ParseError
           return false
         end
