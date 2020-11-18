@@ -178,7 +178,9 @@ module Unity
     end
 
     def parse_request_body(request)
-      JSON.parse(request.body.read)
+      Simdjson.parse(request.body.read)
+    rescue Simdjson::ParseError
+      {}
     end
   end
 end

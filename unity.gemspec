@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'connection_pool', '~> 2.2'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'puma', '~> 5.0'
+  spec.add_dependency 'simdjson'
   spec.add_dependency 'dotenv', '~> 2.7'
   spec.add_dependency 'pry'
 end
