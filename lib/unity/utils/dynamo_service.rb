@@ -7,6 +7,21 @@ module Unity
         @connection_pool.with(&block)
       end
 
+      def find_all(params)
+        Enumerator.new do |arr|
+          params = params.dup
+          loop do
+            result = @connection_pool.with do |conn|
+              conn.query(params)
+            end
+            result.items.each { |item| arr << item }
+            break if result.last_evaluated_key.nil?
+
+            params[:exclusive_start_key] = result.last_evaluated_key
+          end
+        end
+      end
+
       def method_missing(method_name, *args, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, &block)
