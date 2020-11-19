@@ -38,6 +38,10 @@ module Unity
       Time.at(ms / 1e3)
     end
 
+    def self.date_as_string(id)
+      time(id).strftime('%Y-%m-%d')
+    end
+
     # Determines the minimum UUID that could be generated for the given time.
     #
     # @param [Time] time of UUID
