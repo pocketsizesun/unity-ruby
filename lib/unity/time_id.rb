@@ -60,15 +60,8 @@ module Unity
     # @param [Time] time of UUID
     # @param [Numeric] epoch offset
     # @return [Bignum] UUID
-    # @example
-    #   Druuid.min_for_time
-    #   # => 11142943683379200000
     def self.max_for_time(time = Time.now)
-      time = ::Time.new(
-        time.year, time.month, time.day, time.hour, time.min, time.sec + (MAX_TIME_USEC / 1000000)
-      )
-      ms = (time.to_f * 1e3).to_i
-      ms << NUM_RANDOM_BITS
+      min_for_time(time) | 0b111_1111_1111_1111_1111_1111
     end
   end
 end

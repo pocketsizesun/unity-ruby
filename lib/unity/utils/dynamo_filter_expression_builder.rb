@@ -13,6 +13,30 @@ module Unity
         new(criteria, **kwargs).build
       end
 
+      def self.build_and_update!(params, criteria, **kwargs)
+        builder_result = new(criteria, **kwargs).build
+        return params if builder_result.filter_expression.nil?
+
+        params.tap do
+          params[:expression_attribute_names] = \
+            params.fetch(:expression_attribute_names, {}).merge(
+              builder_result.expression_attribute_names
+            )
+          params[:expression_attribute_values] = \
+            params.fetch(:expression_attribute_values, {}).merge(
+              builder_result.expression_attribute_values
+            )
+          params[:filter_expression] = \
+            if !params[:filter_expression].nil?
+              <<~EXPR
+                #{params[:filter_expression]} AND #{builder_result.filter_expression}
+              EXPR
+            else
+              builder_result.filter_expression
+            end
+        end
+      end
+
       def initialize(criteria, **kwargs)
         @criteria = criteria
         @parent_attributes = kwargs.fetch(:path, '').to_s.split('.')

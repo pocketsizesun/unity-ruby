@@ -9,6 +9,7 @@ PATH
       puma (~> 5.0)
       rack (~> 2.2)
       simdjson
+      symbol-fstring
 
 GEM
   remote: https://rubygems.org/
@@ -59,6 +60,7 @@ GEM
       rspec-support (~> 3.9.0)
     rspec-support (3.9.3)
     simdjson (1.0.1)
+    symbol-fstring (1.0.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)

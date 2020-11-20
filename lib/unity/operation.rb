@@ -9,6 +9,16 @@ module Unity
         @data = data.transform_keys(&:to_s)
       end
 
+      def method_missing(method_name, *args, &block)
+        return super unless @data.key?(method_name.name)
+
+        @data.fetch(method_name.name, nil)
+      end
+
+      def respond_to_missing(method_name, include_private = false)
+        @data.key?(method_name.name) || super
+      end
+
       def [](key)
         @data[key.to_s]
       end
