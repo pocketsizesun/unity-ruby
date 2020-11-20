@@ -5,7 +5,7 @@ module Unity
     attr_reader :uuid, :date, :type, :data
 
     def self.parse(str)
-      data = Simdjson.parse(str)
+      data = JSON.parse(str)
       new(
         uuid: data['uuid'],
         date: Time.at(data['date'].to_f / 1000.0),

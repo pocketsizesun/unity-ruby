@@ -145,7 +145,7 @@ module Unity
         { 'content-type' => 'application/json' },
         [operation.call(operation_input).to_json]
       ]
-    rescue Simdjson::ParseError
+    rescue JSON::ParseError
       [500, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
     rescue Unity::Authentication::Error => e
       [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
@@ -182,7 +182,7 @@ module Unity
     end
 
     def parse_request_body(request)
-      Simdjson.parse(request.body.read)
+      JSON.parse(request.body.read)
     end
   end
 end

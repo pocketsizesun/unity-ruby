@@ -3,7 +3,6 @@ require 'securerandom'
 require 'ostruct'
 require 'json'
 require 'symbol-fstring'
-require 'simdjson'
 require 'time'
 require 'singleton'
 require 'dotenv/load'
@@ -31,6 +30,9 @@ require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/dynamo_date_range_with_time_id_query'
 require 'unity/utils/redis_service'
 require 'unity/utils/s3_service'
+
+Encoding.default_internal = Encoding::UTF_8
+Encoding.default_external = Encoding::UTF_8
 
 module Unity
   def self.app_class=(klass)
