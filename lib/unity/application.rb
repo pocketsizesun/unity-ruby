@@ -5,6 +5,8 @@ module Unity
     attr_reader   :config, :initialized_at, :operations, :policies
     attr_accessor :logger
 
+    JSON_PARSER_ERROR = '{\"error\":\"JSON parser error\"}'
+
     def self.inherited(base)
       Unity.app_class = base
     end
@@ -143,6 +145,8 @@ module Unity
         { 'content-type' => 'application/json' },
         [operation.call(operation_input).to_json]
       ]
+    rescue Simdjson::ParseError => e
+      [e.code, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
     rescue Unity::Authentication::Error => e
       [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
     rescue Unity::Operation::OperationError => e
@@ -179,8 +183,6 @@ module Unity
 
     def parse_request_body(request)
       Simdjson.parse(request.body.read)
-    rescue Simdjson::ParseError => e
-      raise StandardError, "Unable to parse error: #{e.message}"
     end
   end
 end
