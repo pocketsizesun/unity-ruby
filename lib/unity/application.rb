@@ -179,8 +179,8 @@ module Unity
 
     def parse_request_body(request)
       Simdjson.parse(request.body.read)
-    rescue Simdjson::ParseError
-      {}
+    rescue Simdjson::ParseError => e
+      raise StandardError, "Unable to parse error: #{e.message}"
     end
   end
 end
