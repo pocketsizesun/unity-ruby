@@ -145,7 +145,7 @@ module Unity
         { 'content-type' => 'application/json' },
         [operation.call(operation_input).to_json]
       ]
-    rescue JSON::ParseError
+    rescue JSON::ParserError
       [500, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
     rescue Unity::Authentication::Error => e
       [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
