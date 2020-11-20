@@ -146,7 +146,7 @@ module Unity
         [operation.call(operation_input).to_json]
       ]
     rescue Simdjson::ParseError => e
-      [e.code, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
+      [500, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
     rescue Unity::Authentication::Error => e
       [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
     rescue Unity::Operation::OperationError => e
