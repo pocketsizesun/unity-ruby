@@ -1,3 +1,9 @@
+GIT
+  remote: git@github.com:pocketsizesun/unity-urn-ruby.git
+  revision: 3709f200731117c098b2a15df90d5dbe5e781730
+  specs:
+    unity-urn (1.0.0)
+
 PATH
   remote: .
   specs:
@@ -9,6 +15,7 @@ PATH
       puma (~> 5.0)
       rack (~> 2.2)
       symbol-fstring
+      unity-urn
 
 GEM
   remote: https://rubygems.org/
@@ -70,6 +77,7 @@ DEPENDENCIES
   rake (~> 12.0)
   rspec (~> 3.0)
   unity!
+  unity-urn!
 
 BUNDLED WITH
    2.1.4
