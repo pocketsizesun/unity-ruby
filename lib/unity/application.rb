@@ -75,6 +75,8 @@ module Unity
       env_config_file = Unity.root + "/config/environments/#{Unity.env}.rb"
       if File.exist?(env_config_file)
         load env_config_file
+        @logger = config.logger unless config.logger.nil?
+        logger.info "load environment config from #{env_config_file}"
       end
 
       # init auth client pool
@@ -109,9 +111,6 @@ module Unity
       end
 
       @rack_app = build_rack_app
-
-      @logger = config.logger unless config.logger.nil?
-      logger.info "load environment config from #{env_config_file}"
     end
 
     def find_operation(name)
