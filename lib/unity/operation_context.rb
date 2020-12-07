@@ -1,31 +1,37 @@
 # frozen_string_literal: true
 
 module Unity
-  class OperationContext < Hash
+  class OperationContext
     # @param data [Hash<String, Object>]
     def initialize(data = {})
-      super()
-      data.each do |k, v|
-        self[k.to_s] = v
-      end
+      @hash = {}
+      data.each { |k, v| @hash[k.to_s] = v }
     end
 
     # @param key [String]
     # @param value
     def []=(key, value)
-      super(key.to_s, value)
+      @hash[key.to_s] = value
     end
 
     # @param key [String]
     # @return A value
     def [](key)
-      super(key.to_s)
+      @hash[key.to_s]
     end
 
     # @param key [String]
     # @param value
     def set(key, value)
-      self[key] = value
+      @hash[key] = value
+    end
+
+    def each(&block)
+      @hash.each(&block)
+    end
+
+    def keys
+      @hash.keys
     end
   end
 end

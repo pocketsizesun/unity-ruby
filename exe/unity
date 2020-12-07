@@ -9,12 +9,12 @@ command = ARGV.shift
 
 case command
 when 'console', 'c'
-  ENV['C9_CONSOLE'] = '1'
+  ENV['UNITY_CONSOLE'] = '1'
   require_relative "#{Dir.pwd}/config/boot.rb"
   require 'pry'
 
   def reload!
-    exec '/usr/bin/env', 'bundle', 'exec', 'tkp', 'console'
+    exec '/usr/bin/env', 'bundle', 'exec', 'unity', 'console'
   end
 
   Pry.start

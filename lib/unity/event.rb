@@ -2,7 +2,7 @@
 
 module Unity
   class Event
-    attr_reader :uuid, :date, :type, :data
+    attr_reader :uuid, :date, :namespace, :type, :data
 
     def self.parse(str)
       data = JSON.parse(str)
@@ -16,13 +16,9 @@ module Unity
 
     def initialize(attributes = {})
       @uuid = attributes.fetch(:uuid) { SecureRandom.uuid }
-      @date = attributes.fetch(:date) { Time.now.round }
-      @type = attributes.fetch(:type).to_s
+      @date = attributes.fetch(:date) { Time.now }
+      @namespace, @type = attributes.fetch(:type).to_s.split(':')
       @data = attributes.fetch(:data) { Hash.new }
-    end
-
-    def emitter
-      @type.to_s.split(':').first
     end
 
     def as_data

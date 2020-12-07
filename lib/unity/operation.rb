@@ -36,8 +36,8 @@ module Unity
       end
     end
 
-    def self.call(args)
-      new.call(args)
+    def self.call(args, context = nil)
+      new(context).call(args)
     end
 
     # @param [Hash] context - A key/value set of options

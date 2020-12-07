@@ -2,10 +2,8 @@
 
 module Unity
   class Application
-    attr_reader   :config, :initialized_at, :operations, :policies
+    attr_reader   :config, :initialized_at, :operations, :policies, :event_handlers
     attr_accessor :logger
-
-    JSON_PARSER_ERROR = '{"error":"JSON parser error"}'
 
     def self.inherited(base)
       Unity.app_class = base
@@ -24,6 +22,7 @@ module Unity
       @logger = Unity::Logger.new(STDOUT)
       @operations = {}
       @policies = {}
+      @event_handlers = {}
       @initialized_at = Time.now.to_i
       @authentication_client_pool = nil
       @config = OpenStruct.new(
@@ -35,6 +34,7 @@ module Unity
         auth_enabled: true,
         auth_endpoint: nil
       )
+      @rack_app = nil
     end
 
     def name=(arg)
@@ -55,9 +55,14 @@ module Unity
       @policies[name] = klass_name || "#{name}OperationPolicy".to_sym
     end
 
+    def event_handler(name, klass)
+      @event_handlers[name.to_s] = "#{klass}EventHandler".to_sym
+    end
+
     def load!
       @operation_handlers = {}
       @policy_handlers = {}
+      @event_handler_instances = {}
 
       # init time zone
       ENV['TZ'] = config.time_zone
@@ -90,6 +95,12 @@ module Unity
       policies.each do |k, v|
         @policy_handlers[k] = @module.const_get(:OperationPolicies).const_get(v)
       end
+
+      event_handlers.each do |k, v|
+        @event_handler_instances[k] = @module.const_get(:EventHandlers).const_get(v).new
+      end
+
+      @rack_app = build_rack_app
     end
 
     def find_operation(name)
@@ -100,78 +111,21 @@ module Unity
       @policy_handlers[name.to_s]
     end
 
+    def find_event_handler(name)
+      raise EventHandlerNotFound, name unless @event_handlers.key?(name)
+
+      @event_handlers[name]
+    end
+
+    def call_event_handler(name, input)
+      find_event_handler(name).call(input)
+    end
+
     def call(env)
-      request = Rack::Request.new(env)
-      if request.path == '/_status'
-        return [
-          200,
-          { 'content-type' => 'application/json' },
-          ["{\"uptime\":#{get_current_time - initialized_at}}"]
-        ]
-      end
-
-      operation_name = request.params.fetch('Operation', nil)
-      operation_handler = find_operation(operation_name)
-      return render_error('Operation not found') if operation_handler.nil?
-
-      operation_input = parse_request_body(request)
-      operation_context = Unity::OperationContext.new
-
-      if config.auth_enabled == true
-        policy_handler = find_policy(operation_name)
-        unless policy_handler.nil?
-          policy = policy_handler.new(operation_context)
-          policy.call(operation_input)
-        end
-
-        if operation_context.fetch(:auth_enabled, true) == true
-          auth_result = @authentication_client_pool.with do |client|
-            client.authenticate(
-              request.get_header('HTTP_AUTHORIZATION'),
-              "#{@auth_namespace}:#{operation_name}",
-              resource: operation_context.fetch(:auth_resource, nil),
-              conditions: operation_context.fetch(:auth_conditions, nil)
-            )
-          end
-
-          operation_context.set(:auth_result, auth_result)
-        end
-      end
-
-      operation = operation_handler.new(operation_context)
-
-      [
-        200,
-        { 'content-type' => 'application/json' },
-        [operation.call(operation_input).to_json]
-      ]
-    rescue JSON::ParserError
-      [500, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
-    rescue Unity::Authentication::Error => e
-      [e.code, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
-    rescue Unity::Operation::OperationError => e
-      logger&.error(
-        'message' => e.message,
-        'data' => e.data,
-        'operation_input' => operation_input
-      )
-      [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
-    rescue => e
-      log = {
-        'message' => 'Exception raised',
-        'exception_message' => e.message,
-        'exception_klass' => e.class.to_s,
-        'exception_backtrace' => e.backtrace
-      }
-      logger&.fatal(log)
-      [500, { 'content-type' => 'application/json' }, [log.to_json]]
+      @rack_app.call(env)
     end
 
     private
-
-    def get_current_time
-      Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
-    end
 
     def render_error(error, data = {}, code = 400)
       [
@@ -183,6 +137,23 @@ module Unity
 
     def parse_request_body(request)
       JSON.parse(request.body.read)
+    end
+
+    def build_rack_app
+      __self__ = self
+
+      Rack::Builder.new do
+        map '/_status' do
+          run Unity::Middlewares::HealthCheckMiddleware.new
+        end
+
+        use Unity::Middlewares::RequestParserMiddleware
+        if __self__.config.auth_enabled == true
+          use Unity::Middlewares::AuthenticationMiddleware
+        end
+
+        run Unity::Middlewares::OperationExecutorMiddleware.new
+      end.to_app
     end
   end
 end

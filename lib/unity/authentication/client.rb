@@ -7,11 +7,11 @@ module Unity
       attr_reader :endpoint
 
       AUTHENTICATE_PARAMETERS = { 'Action' => 'AuthorizeToken' }.freeze
-      DEFAULT_ENDPOINT_URL = 'https://api.iam.tikt.net'
+      DEFAULT_ENDPOINT_URL = 'https://iam.api.dumgum.net'
 
       def initialize(endpoint = nil)
         @endpoint = \
-          endpoint || ENV.fetch('TIKT_IAM_ENDPOINT', DEFAULT_ENDPOINT_URL)
+          endpoint || ENV.fetch('UNITY_IAM_ENDPOINT', DEFAULT_ENDPOINT_URL)
         @http = HTTP.persistent(@endpoint)
       end
 
