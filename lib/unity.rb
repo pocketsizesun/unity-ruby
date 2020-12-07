@@ -76,4 +76,8 @@ module Unity
   def self.environment=(arg)
     self.env = arg
   end
+
+  def self.root
+    @root ||= Dir.pwd
+  end
 end

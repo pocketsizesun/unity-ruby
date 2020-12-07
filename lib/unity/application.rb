@@ -37,6 +37,10 @@ module Unity
       @rack_app = nil
     end
 
+    def configure(&block)
+      instance_exec(&block)
+    end
+
     def name=(arg)
       @name = arg.to_s
     end
@@ -67,6 +71,12 @@ module Unity
       # init time zone
       ENV['TZ'] = config.time_zone
 
+      # load specific environment config
+      env_config_file = Unity.root + "/config/environments/#{Unity.env}.rb"
+      if File.exist?(env_config_file)
+        load env_config_file
+      end
+
       # init auth client pool
       if config.auth_enabled == true
         @authentication_client_pool = ConnectionPool.new(
@@ -85,11 +95,9 @@ module Unity
       end
 
       operations.each do |k, v|
-        begin
           @operation_handlers[k] = @module.const_get(:Operations).const_get(v)
-        rescue NameError
-          raise "Operation class '#{v}' not found"
-        end
+      rescue NameError
+        raise "Operation class '#{v}' not found"
       end
 
       policies.each do |k, v|
@@ -101,6 +109,9 @@ module Unity
       end
 
       @rack_app = build_rack_app
+
+      @logger = config.logger unless config.logger.nil?
+      logger.info "load environment config from #{env_config_file}"
     end
 
     def find_operation(name)
