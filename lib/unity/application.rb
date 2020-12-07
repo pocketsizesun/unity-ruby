@@ -32,7 +32,8 @@ module Unity
         max_threads: 4,
         auth_connection_timeout: 5,
         auth_enabled: true,
-        auth_endpoint: nil
+        auth_endpoint: nil,
+        log_level: Logger::INFO
       )
       @rack_app = nil
     end
@@ -76,7 +77,8 @@ module Unity
       if File.exist?(env_config_file)
         load env_config_file
         @logger = config.logger unless config.logger.nil?
-        logger.info "load environment config from #{env_config_file}"
+        @logger&.level = config.log_level
+        logger&.info "load environment config from #{env_config_file}"
       end
 
       # init auth client pool
