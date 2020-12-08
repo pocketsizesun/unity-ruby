@@ -124,9 +124,9 @@ module Unity
     end
 
     def find_event_handler(name)
-      raise EventHandlerNotFound, name unless @event_handlers.key?(name)
+      return nil unless @event_handler_instances.key?(name)
 
-      @event_handlers[name]
+      @event_handler_instances[name]
     end
 
     def call_event_handler(name, input)

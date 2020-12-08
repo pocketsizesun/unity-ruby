@@ -4,14 +4,18 @@ module Unity
   class Event
     attr_reader :id, :name, :date, :namespace, :type, :data
 
+    EventMalformatedError = Class.new(StandardError)
+
     def self.parse(str)
       data = JSON.parse(str)
       new(
-        id: data['id'],
-        date: Time.at(data['date'].to_f / 1000.0),
-        name: data['name'],
-        data: data['data']
+        id: data.fetch('id'),
+        date: Time.at(data.fetch('date').to_f / 1000.0),
+        name: data.fetch('name'),
+        data: data.fetch('data')
       )
+    rescue KeyError, JSON::ParserError
+      raise EventMalformatedError
     end
 
     def initialize(attributes = {})
