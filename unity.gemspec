@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency 'aws-sdk-sns', '~> 1.36'
   spec.add_dependency 'http', '~> 4.4'
   spec.add_dependency 'connection_pool', '~> 2.2'
   spec.add_dependency 'unity-urn'

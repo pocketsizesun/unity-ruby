@@ -8,6 +8,7 @@ require 'singleton'
 require 'dotenv/load'
 require 'http'
 require 'connection_pool'
+require 'aws-sdk-sns'
 require 'rack'
 require 'rack/builder'
 require 'unity/version'
@@ -79,5 +80,9 @@ module Unity
 
   def self.root
     @root ||= Dir.pwd
+  end
+
+  def self.event_emitter
+    @event_emitter ||= Unity::EventEmitter.new(Unity.application.name)
   end
 end

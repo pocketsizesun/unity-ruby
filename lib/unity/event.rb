@@ -2,31 +2,32 @@
 
 module Unity
   class Event
-    attr_reader :uuid, :date, :namespace, :type, :data
+    attr_reader :id, :name, :date, :namespace, :type, :data
 
     def self.parse(str)
       data = JSON.parse(str)
       new(
-        uuid: data['uuid'],
+        id: data['id'],
         date: Time.at(data['date'].to_f / 1000.0),
-        type: data['type'],
+        name: data['name'],
         data: data['data']
       )
     end
 
     def initialize(attributes = {})
-      @uuid = attributes.fetch(:uuid) { SecureRandom.uuid }
+      @id = attributes.fetch(:id) { SecureRandom.uuid }
       @date = attributes.fetch(:date) { Time.now }
-      @namespace, @type = attributes.fetch(:type).to_s.split(':')
+      @name = attributes.fetch(:name)
       @data = attributes.fetch(:data) { Hash.new }
+      @namespace, @type = @name.split(':')
     end
 
     def as_data
       {
-        'uuid' => @uuid,
-        'date' => (@date.to_f * 1000.0).to_i,
-        'type' => @type.to_s,
-        'data' => @data
+        'id' => id,
+        'name' => "#{namespace}:#{type}",
+        'date' => (date.to_f * 1000.0).to_i,
+        'data' => data
       }
     end
 
@@ -35,14 +36,7 @@ module Unity
     end
 
     def to_h
-      { uuid: @uuid, date: @date.to_i, type: @type, data: @data }
-    end
-
-    def parse_date(value)
-      return Time.now if value.nil?
-      return Time.at(value.to_f / 1000.0) if value.is_a?(Integer)
-      return value if value.is_a?(Time)
-      Time.parse(value.to_s)
+      { id: id, name: name, date: date, data: data }
     end
   end
 end
