@@ -1,13 +1,13 @@
 GIT
   remote: git@github.com:pocketsizesun/unity-urn-ruby.git
-  revision: 3709f200731117c098b2a15df90d5dbe5e781730
+  revision: 934c1ca8953e3548a225febc51be65e5776ea8a0
   specs:
-    unity-urn (1.0.0)
+    unity-urn (1.0.1)
 
 PATH
   remote: .
   specs:
-    unity (1.1.3)
+    unity (1.1.4)
       aws-sdk-sns (~> 1.36)
       connection_pool (~> 2.2)
       dotenv (~> 2.7)
@@ -24,7 +24,7 @@ GEM
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
     aws-eventstream (1.1.0)
-    aws-partitions (1.402.0)
+    aws-partitions (1.403.0)
     aws-sdk-core (3.110.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.239.0)
