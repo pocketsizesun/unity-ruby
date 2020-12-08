@@ -21,7 +21,7 @@ module Unity
         Unity.logger&.error(
           'message' => e.message,
           'data' => e.data,
-          'operation_input' => operation_input
+          'operation_input' => env['unity.operation_input']
         )
         [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
       rescue => e
