@@ -63,6 +63,13 @@ module Unity
       def process_work_data(work_data)
         event = parse_event(work_data['sqs_message_body'])
         event_handler = Unity.application.find_event_handler(event.name)
+        if event_handler.nil?
+          Unity.logger&.error(
+            'error' => "unable to find event handler for '#{event.name}'",
+            'work_data' => work_data
+          )
+          return
+        end
 
         @thread_pool.post(work_data, event_handler) do |w_data, handler|
           handler.call(event)
@@ -79,7 +86,8 @@ module Unity
           'error' => 'event:consumer exception',
           'exception_klass' => e.class.to_s,
           'exception_message' => e.message,
-          'exception_backtrace' => e.backtrace
+          'exception_backtrace' => e.backtrace,
+          'work_data' => work_data
         )
       end
 

@@ -3,7 +3,7 @@
 module Unity
   # This is an example of documentation comment
   class EventEmitter
-    attr_reader :source
+    attr_reader :source, :topic_arn
 
     def initialize(source, topic_arn: nil, connection_pool_size: 4, connection_pool_timeout: 5, client: nil)
       @source = source.to_s
