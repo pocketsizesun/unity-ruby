@@ -71,5 +71,5 @@ when 'event:consumer'
 
   Unity::EventConsumer.run(options)
 else
-  exec '/usr/bin/env', 'bundle', 'exec', 'rake', '--rakefile', "#{Dir.pwd}/Rakefile", *orig_args
+  exec '/usr/bin/env', 'bundle', 'exec', 'rake', '--rakefile', "#{File.realpath(File.dirname(__FILE__) + '/../')}/Rakefile.application", *orig_args
 end

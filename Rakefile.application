@@ -1,0 +1,5 @@
+require_relative "#{Dir.pwd}/config/boot"
+
+Dir.glob("#{Dir.pwd}/lib/tasks/**/*.rake").each do |rake_file|
+  load rake_file
+end
