@@ -3,8 +3,6 @@
 module Unity
   module Middlewares
     class RequestParserMiddleware
-      JSON_PARSER_ERROR = '{"error":"JSON parser error"}'
-
       def initialize(app)
         @app = app
       end
@@ -16,8 +14,14 @@ module Unity
         env['unity.operation_context'] = Unity::OperationContext.new
         env['unity.operation_input'] = parse_request_body(env['rack.request'])
         @app.call(env)
-      rescue JSON::ParserError
-        [500, { 'content-type' => 'application/json' }, [JSON_PARSER_ERROR]]
+      rescue JSON::ParserError => e
+        [
+          500,
+          { 'content-type' => 'application/json' },
+          [
+            { 'error' => "JSON parser error: #{e.message}" }
+          ]
+        ]
       end
 
       private
@@ -28,7 +32,7 @@ module Unity
         body = request.body.read.to_s
         return {} if body.empty?
 
-        JSON.parse(request.body.read)
+        JSON.parse(body)
       end
     end
   end
