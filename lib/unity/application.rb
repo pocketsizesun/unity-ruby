@@ -38,6 +38,12 @@ module Unity
       @rack_app = nil
     end
 
+    def load_tasks
+      Dir.glob("#{Unity.root}/lib/tasks/**/*.rake").each do |rake_file|
+        load rake_file
+      end
+    end
+
     def configure(&block)
       instance_exec(&block)
     end
