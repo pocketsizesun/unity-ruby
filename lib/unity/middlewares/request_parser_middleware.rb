@@ -9,6 +9,7 @@ module Unity
         @app = app
       end
 
+      # @param [Hash] env
       def call(env)
         env['rack.request'] = Rack::Request.new(env)
         env['unity.operation_name'] = env['rack.request'].params.fetch('Operation', nil)
@@ -21,7 +22,12 @@ module Unity
 
       private
 
+      # @param [Rack::Request] request
+      # @return [Hash]
       def parse_request_body(request)
+        body = request.body.read.to_s
+        return {} if body.empty?
+
         JSON.parse(request.body.read)
       end
     end
