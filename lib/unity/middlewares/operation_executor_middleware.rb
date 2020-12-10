@@ -25,16 +25,43 @@ module Unity
         )
         [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
       rescue => e
-        log = {
-          'error' => 'app.exception',
+        exception_id = Unity::TimeId.random
+
+        Unity.logger&.fatal(
+          'message' => "service exception: #{e.class}",
           'data' => {
+            'exception_id' => exception_id,
             'exception_message' => e.message,
-            'exception_klass' => e.class.to_s,
             'exception_backtrace' => e.backtrace
           }
-        }
-        Unity.logger&.fatal(log)
-        [500, { 'content-type' => 'application/json' }, [log.to_json]]
+        )
+        if Unity.application.config.report_exception == true
+          [
+            500,
+            { 'content-type' => 'application/json' },
+            [
+              {
+                'error' => "service error: #{exception_id}",
+                'data' => {}
+              }.to_json
+            ]
+          ]
+        else
+          [
+            500,
+            { 'content-type' => 'application/json' },
+            [
+              {
+                'error' => 'app.exception',
+                'data' => {
+                  'exception_message' => e.message,
+                  'exception_klass' => e.class.to_s,
+                  'exception_backtrace' => e.backtrace
+                }
+              }.to_json
+            ]
+          ]
+        end
       end
 
       private

@@ -65,7 +65,7 @@ module Unity
         event_handler = Unity.application.find_event_handler(event.name)
         if event_handler.nil?
           Unity.logger&.error(
-            'error' => "unable to find event handler for '#{event.name}'",
+            'message' => "unable to find event handler for '#{event.name}'",
             'work_data' => work_data
           )
           return
@@ -78,13 +78,12 @@ module Unity
       rescue Unity::Event::EventMalformatedError
         delete_sqs_message(work_data['sqs_receipt_handle'])
         Unity.logger&.fatal(
-          'error' => 'unable to parse event from received work data',
+          'message' => 'unable to parse event from received work data',
           'work_data' => work_data
         )
       rescue => e
         Unity.logger&.fatal(
-          'error' => 'event:consumer exception',
-          'exception_klass' => e.class.to_s,
+          'message' => "[event:consumer] exception: #{e.class}",
           'exception_message' => e.message,
           'exception_backtrace' => e.backtrace,
           'work_data' => work_data
