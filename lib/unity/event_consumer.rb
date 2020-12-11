@@ -1,3 +1,4 @@
+require 'aws-sdk-sqs'
 require 'unity/event_consumer/container'
 require 'unity/event_consumer/worker'
 
