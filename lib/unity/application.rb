@@ -33,7 +33,8 @@ module Unity
         auth_connection_timeout: 5,
         auth_enabled: true,
         auth_endpoint: nil,
-        log_level: Logger::INFO
+        log_level: Logger::INFO,
+        event_emitter_enabled: true
       )
       @rack_app = nil
     end

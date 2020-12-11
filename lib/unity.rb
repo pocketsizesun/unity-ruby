@@ -83,6 +83,9 @@ module Unity
   end
 
   def self.event_emitter
-    @event_emitter ||= Unity::EventEmitter.new(Unity.application.name)
+    return @event_emitter unless @event_emitter.nil?
+    return nil unless Unity.application.config.event_emitter_enabled == true
+
+    @event_emitter = Unity::EventEmitter.new(Unity.application.name)
   end
 end
