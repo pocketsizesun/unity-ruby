@@ -61,9 +61,16 @@ module Unity
       end
 
       def process_work_data(work_data)
+        @thread_pool.post(work_data) do |w_data|
+          process_event(w_data)
+        end
+      end
+
+      def process_event(work_data)
         event = parse_event(work_data['sqs_message_body'])
         event_handler = Unity.application.find_event_handler(event.name)
         if event_handler.nil?
+          delete_sqs_message(work_data['sqs_receipt_handle'])
           Unity.logger&.error(
             'message' => "unable to find event handler for '#{event.name}'",
             'work_data' => work_data
@@ -71,10 +78,7 @@ module Unity
           return
         end
 
-        @thread_pool.post(work_data, event_handler) do |w_data, handler|
-          handler.call(event)
-          delete_sqs_message(w_data['sqs_receipt_handle'])
-        end
+        delete_sqs_message(work_data['sqs_receipt_handle'])
       rescue Unity::Event::EventMalformatedError
         delete_sqs_message(work_data['sqs_receipt_handle'])
         Unity.logger&.fatal(

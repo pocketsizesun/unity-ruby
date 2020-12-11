@@ -43,6 +43,7 @@ module Unity
             queue_url: @sqs_queue_url,
             wait_time_seconds: 5
           )
+          Unity.logger&.debug "SQS receive messages count: #{sqs_recv_result.messages.length}"
           sqs_recv_result.messages.each do |message|
             work_data = {
               'sqs_receipt_handle' => message.receipt_handle,
@@ -51,6 +52,7 @@ module Unity
             }
             worker = nil
             begin
+              Unity.logger&.debug "process work data: #{work_data.inspect}"
               worker = @workers_queue.pop
               worker.input.puts '$w'
               worker.input.puts work_data.to_json
@@ -74,6 +76,9 @@ module Unity
         end
 
         Unity.logger&.info "event:consumer terminated"
+      rescue Aws::SQS::Errors::NonExistentQueue
+        p @sqs.list_queues
+        abort "SQS Queue '#{@queue_name}' does not exists"
       end
 
       private
