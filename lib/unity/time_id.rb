@@ -61,8 +61,7 @@ module Unity
     # @param [Numeric] epoch offset
     # @return [Bignum] UUID
     def self.max_for_time(time = Time.now)
-      ms = ((time.round.to_i + 0.999999) * 1e3).to_i
-      ms << NUM_RANDOM_BITS
+      from(time) | 0b111_1111_1111_1111_1111_1111
     end
 
     def self.range(from, to)
