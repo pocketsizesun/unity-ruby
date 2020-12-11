@@ -39,6 +39,8 @@ module Unity
         check_workers_health
 
         loop do
+          break if @terminate == true
+
           sqs_recv_result = @sqs.receive_message(
             queue_url: @sqs_queue_url,
             wait_time_seconds: 5
@@ -59,8 +61,6 @@ module Unity
               @workers_queue << worker unless worker.nil?
             end
           end
-
-          break if @terminate == true
 
           check_workers_health
         end

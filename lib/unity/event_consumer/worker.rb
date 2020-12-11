@@ -36,8 +36,6 @@ module Unity
             when '$e' then break
             end
           end
-
-          break if @terminate == true
         end
 
         @thread_pool.shutdown
