@@ -60,73 +60,77 @@ module Unity
         @criteria.each_with_index do |(filter_name, filter_value), filter_idx|
           case filter_value
           when Hash
-            operator_name, operator_value = filter_value.to_a.first
-            case operator_name
-            when '$in'
-              filter_clauses = []
-              Array(operator_value).each_with_index do |item, idx|
-                filter_value_key = ":filter_#{filter_idx}_v#{idx}"
-                filter_clauses << filter_value_key
-                expression_attribute_values[filter_value_key] = item.to_s
-              end
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} IN (#{filter_clauses.join(',')})"
-            when '$gt'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} > :filter_#{filter_idx}_v0"
-            when '$gte'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} >= :filter_#{filter_idx}_v0"
-            when '$lt'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} < :filter_#{filter_idx}_v0"
-            when '$lte'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} <= :filter_#{filter_idx}_v0"
-            when '$neq'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "#{build_filter_attribute_name(filter_name)} <> :filter_#{filter_idx}_v0"
-            when '$exists'
-              if operator_value == false
-                filter_expressions << "attribute_not_exists(#{build_filter_attribute_name(filter_name)})"
+            sub_filter_expressions = []
+            filter_value.each_with_index do |(operator_name, operator_value), filter_operator_idx|
+              case operator_name
+              when '$in'
+                filter_clauses = []
+                Array(operator_value).each_with_index do |item, idx|
+                  filter_value_key = ":filter_#{filter_idx}_#{filter_operator_idx}_v#{idx}"
+                  filter_clauses << filter_value_key
+                  expression_attribute_values[filter_value_key] = item.to_s
+                end
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} IN (#{filter_clauses.join(',')})"
+              when '$gt'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} > :filter_#{filter_idx}_#{filter_operator_idx}_v0"
+              when '$gte'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} >= :filter_#{filter_idx}_#{filter_operator_idx}_v0"
+              when '$lt'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} < :filter_#{filter_idx}_#{filter_operator_idx}_v0"
+              when '$lte'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} <= :filter_#{filter_idx}_#{filter_operator_idx}_v0"
+              when '$neq'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "#{build_filter_attribute_name(filter_name)} <> :filter_#{filter_idx}_#{filter_operator_idx}_v0"
+              when '$exists'
+                if operator_value == false
+                  sub_filter_expressions << "attribute_not_exists(#{build_filter_attribute_name(filter_name)})"
+                else
+                  sub_filter_expressions << "attribute_exists(#{build_filter_attribute_name(filter_name)})"
+                end
+              when '$type'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "attribute_type(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$begins_with'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "begins_with(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$not_begins_with'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "NOT begins_with(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$contains'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "contains(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$not_contains'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                sub_filter_expressions << "NOT contains(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$size'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
+                sub_filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) = :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$size_lt'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
+                sub_filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) < :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$size_lte'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
+                sub_filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) <= :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$size_gt'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
+                sub_filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) > :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+              when '$size_gte'
+                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
+                sub_filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) >= :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
               else
-                filter_expressions << "attribute_exists(#{build_filter_attribute_name(filter_name)})"
+                next
               end
-            when '$type'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "attribute_type(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_v0)"
-            when '$begins_with'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "begins_with(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_v0)"
-            when '$not_begins_with'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "NOT begins_with(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_v0)"
-            when '$contains'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "contains(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_v0)"
-            when '$not_contains'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value
-              filter_expressions << "NOT contains(#{build_filter_attribute_name(filter_name)}, :filter_#{filter_idx}_v0)"
-            when '$size'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value.to_i
-              filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) = :filter_#{filter_idx}_v0)"
-            when '$size_lt'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value.to_i
-              filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) < :filter_#{filter_idx}_v0)"
-            when '$size_lte'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value.to_i
-              filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) <= :filter_#{filter_idx}_v0)"
-            when '$size_gt'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value.to_i
-              filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) > :filter_#{filter_idx}_v0)"
-            when '$size_gte'
-              expression_attribute_values[":filter_#{filter_idx}_v0"] = operator_value.to_i
-              filter_expressions << "size(#{build_filter_attribute_name(filter_name)}) >= :filter_#{filter_idx}_v0)"
-            else
-              next
             end
+
+            filter_expressions << "(#{sub_filter_expressions.join(' AND ')})"
           else
-            expression_attribute_values[":filter_#{filter_idx}_v0"] = filter_value
-            filter_expressions << "#{build_filter_attribute_name(filter_name)} = :filter_#{filter_idx}_v0"
+            expression_attribute_values[":filter_#{filter_idx}_0_v0"] = filter_value
+            filter_expressions << "#{build_filter_attribute_name(filter_name)} = :filter_#{filter_idx}_0_v0"
           end
 
           filter_name.split('.').each do |item|

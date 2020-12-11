@@ -34,8 +34,10 @@ module Unity
         sort_key_value = \
           if !exclusive_start_key.nil?
             exclusive_start_key[@sort_key_name].to_i
+          elsif scan_index_forward == true
+            Unity::TimeId.min_for_time(from)
           else
-            Unity::TimeId.from(from)
+            Unity::TimeId.max_for_time(to)
           end
 
         date = Date.parse(partition_key_value)
@@ -80,6 +82,11 @@ module Unity
             }
           end
         query_result.items = result.items
+
+        if result.items.length > 0
+          sort_key_value = result.items.last[@sort_key_name].to_i
+        end
+
         if result.last_evaluated_key.nil?
           if scan_index_forward == true
             next_date = date + 1
