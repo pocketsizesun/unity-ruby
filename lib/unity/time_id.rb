@@ -51,7 +51,7 @@ module Unity
     #   Druuid.min_for_time
     #   # => 11142943683379200000
     def self.min_for_time(time = Time.now)
-      ms = (time.to_f * 1e3).round
+      ms = (time.round.to_f * 1e3).to_i
       ms << NUM_RANDOM_BITS
     end
 
@@ -61,7 +61,12 @@ module Unity
     # @param [Numeric] epoch offset
     # @return [Bignum] UUID
     def self.max_for_time(time = Time.now)
-      min_for_time(time) | 0b111_1111_1111_1111_1111_1111
+      ms = ((time.round.to_f * 1e3).to_f + MAX_TIME_USEC).to_i
+      ms << NUM_RANDOM_BITS
+    end
+
+    def self.range(from, to)
+      min_for_time(from)..max_for_time(to)
     end
   end
 end

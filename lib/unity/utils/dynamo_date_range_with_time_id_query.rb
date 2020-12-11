@@ -26,12 +26,10 @@ module Unity
         partition_key_value = \
           if !exclusive_start_key.nil?
             exclusive_start_key[@partition_key_name]
+          elsif scan_index_forward == true
+            from.strftime('%Y-%m-%d')
           else
-            if scan_index_forward == true
-              from.strftime('%Y-%m-%d')
-            else
-              to.strftime('%Y-%m-%d')
-            end
+            to.strftime('%Y-%m-%d')
           end
         sort_key_value = \
           if !exclusive_start_key.nil?
@@ -110,7 +108,10 @@ module Unity
       def build_query_options(options)
         {}.tap do |params|
           if options.key?(:exclusive_start_key)
-            params[:exclusive_start_key] = options.fetch(:exclusive_start_key)
+            params[:exclusive_start_key] = {
+              @partition_key_name => options[:exclusive_start_key][@partition_key_name],
+              @sort_key_name => options[:exclusive_start_key][@sort_key_name].to_i
+            }
           end
           if options.key?(:filter_expression)
             params[:filter_expression] = options.fetch(:filter_expression)
