@@ -61,6 +61,8 @@ module Unity
       end
 
       def process_work_data(work_data)
+        Unity.logger&.debug "[worker:#{Process.pid}] process work data: #{work_data.inspect}"
+
         @thread_pool.post(work_data) do |w_data|
           process_event(w_data)
         end
@@ -77,6 +79,8 @@ module Unity
           )
           return
         end
+
+        event_handler.call(event)
 
         delete_sqs_message(work_data['sqs_receipt_handle'])
       rescue Unity::Event::EventMalformatedError

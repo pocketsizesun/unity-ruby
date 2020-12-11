@@ -52,7 +52,6 @@ module Unity
             }
             worker = nil
             begin
-              Unity.logger&.debug "process work data: #{work_data.inspect}"
               worker = @workers_queue.pop
               worker.input.puts '$w'
               worker.input.puts work_data.to_json
