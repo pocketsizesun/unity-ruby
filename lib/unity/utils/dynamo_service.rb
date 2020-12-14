@@ -22,6 +22,13 @@ module Unity
         end
       end
 
+      def query(params)
+        @connection_pool.with do |conn|
+          Unity.logger&.debug "[DynamoService] execute query: #{params.inspect}"
+          conn.query(params)
+        end
+      end
+
       def method_missing(method_name, *args, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, &block)
