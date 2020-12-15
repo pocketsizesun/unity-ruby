@@ -72,6 +72,14 @@ module Unity
                   expression_attribute_values[filter_value_key] = item.to_s
                 end
                 sub_filter_expressions << "#{filter_attribute_name} IN (#{filter_clauses.join(',')})"
+              when '$not_in'
+                filter_clauses = []
+                Array(operator_value).each_with_index do |item, idx|
+                  filter_value_key = ":filter_#{filter_idx}_#{filter_operator_idx}_v#{idx}"
+                  filter_clauses << filter_value_key
+                  expression_attribute_values[filter_value_key] = item.to_s
+                end
+                sub_filter_expressions << "NOT #{filter_attribute_name} IN (#{filter_clauses.join(',')})"
               when '$gt'
                 expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
                 sub_filter_expressions << "#{filter_attribute_name} > :filter_#{filter_idx}_#{filter_operator_idx}_v0"
@@ -105,7 +113,6 @@ module Unity
               when '$contains'
                 if operator_value.is_a?(Array)
                   contains_exprs = []
-                  filter_attribute_name = filter_attribute_name
                   operator_value.each_with_index do |item, item_idx|
                     expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx}"] = item
                     contains_exprs << "contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx})"
@@ -115,9 +122,42 @@ module Unity
                   expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
                   sub_filter_expressions << "contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
                 end
+              when '$contains_all'
+                if operator_value.is_a?(Array)
+                  contains_exprs = []
+                  operator_value.each_with_index do |item, item_idx|
+                    expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx}"] = item
+                    contains_exprs << "contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx})"
+                  end
+                  sub_filter_expressions << contains_exprs.join(' AND ')
+                else
+                  expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                  sub_filter_expressions << "contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+                end
               when '$not_contains'
-                expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
-                sub_filter_expressions << "NOT contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+                if operator_value.is_a?(Array)
+                  contains_exprs = []
+                  operator_value.each_with_index do |item, item_idx|
+                    expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx}"] = item
+                    contains_exprs << "NOT contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx})"
+                  end
+                  sub_filter_expressions << contains_exprs.join(' OR ')
+                else
+                  expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                  sub_filter_expressions << "NOT contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+                end
+              when '$not_contains_all'
+                if operator_value.is_a?(Array)
+                  contains_exprs = []
+                  operator_value.each_with_index do |item, item_idx|
+                    expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx}"] = item
+                    contains_exprs << "NOT contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v#{item_idx})"
+                  end
+                  sub_filter_expressions << contains_exprs.join(' AND ')
+                else
+                  expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value
+                  sub_filter_expressions << "NOT contains(#{filter_attribute_name}, :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
+                end
               when '$size'
                 expression_attribute_values[":filter_#{filter_idx}_#{filter_operator_idx}_v0"] = operator_value.to_i
                 sub_filter_expressions << "size(#{filter_attribute_name}) = :filter_#{filter_idx}_#{filter_operator_idx}_v0)"
