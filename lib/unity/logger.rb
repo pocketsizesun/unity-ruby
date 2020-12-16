@@ -5,7 +5,7 @@ module Unity
       self.formatter = proc do |severity, datetime, progname, msg|
         row = {
           '_severity' => severity,
-          '_date' => datetime.iso8601,
+          '_date' => datetime.utc.iso8601,
           '_source' => Unity.application.name
         }
         if msg.is_a?(Hash)
