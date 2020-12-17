@@ -1,3 +1,4 @@
+require 'socket'
 require 'logger'
 require 'securerandom'
 require 'ostruct'
