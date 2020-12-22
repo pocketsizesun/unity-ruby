@@ -38,12 +38,13 @@ module Unity
 
         check_workers_health
 
+        Unity.logger&.info "[event:consumer] start container (pid=#{Process.pid})"
         loop do
           break if @terminate == true
 
           sqs_recv_result = @sqs.receive_message(
             queue_url: @sqs_queue_url,
-            wait_time_seconds: 5
+            wait_time_seconds: 8
           )
           Unity.logger&.debug "SQS receive messages count: #{sqs_recv_result.messages.length}"
           sqs_recv_result.messages.each do |message|
@@ -76,7 +77,6 @@ module Unity
 
         Unity.logger&.info "event:consumer terminated"
       rescue Aws::SQS::Errors::NonExistentQueue
-        p @sqs.list_queues
         abort "SQS Queue '#{@queue_name}' does not exists"
       end
 
@@ -88,7 +88,7 @@ module Unity
           worker.input.puts '$ping'
           pipe_readable = @health_check_pipes[0].wait_readable(2)
           read_data = pipe_readable&.gets&.strip
-          if pipe_readable.nil? || read_data != '$pong'
+          if @terminate == false && (pipe_readable.nil? || read_data != '$pong')
             Unity.logger&.error "worker #{worker.pid} is dead, replacing it"
             replace_worker(worker)
           end

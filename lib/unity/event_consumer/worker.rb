@@ -12,6 +12,7 @@ module Unity
         @input, @output = pipes
         @thread_pool = Concurrent::FixedThreadPool.new(container.concurrency)
         @terminate = false
+        @parent_pid = Process.ppid
 
         Signal.trap('INT') { stop }
         Signal.trap('TERM') { stop }
@@ -22,8 +23,14 @@ module Unity
       end
 
       def run
-        Unity.logger&.info "[event:consumer] start worker (pid=#{Process.pid})"
+        Unity.logger&.info "[event:consumer] start worker (pid=#{Process.pid}, ppid=#{@parent_pid})"
         loop do
+          begin
+            Process.kill 0, @parent_pid
+          rescue Errno::ESRCH
+            Unity.logger&.warn '[event:consumer] parent pid exited! terminating'
+            break
+          end
           Unity.logger&.debug 'waiting for work data'
           input_readable = @input.wait_readable(2)
           unless input_readable.nil?
@@ -36,6 +43,8 @@ module Unity
             when '$e' then break
             end
           end
+
+          break if @terminate == true
         end
 
         @thread_pool.shutdown

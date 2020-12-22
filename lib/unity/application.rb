@@ -37,6 +37,25 @@ module Unity
         event_emitter_enabled: true
       )
       @rack_app = nil
+      @file_configurations = {}
+    end
+
+    def config_for(name)
+      name = name.to_s
+      return @file_configurations[name] if @file_configurations.key?(name)
+
+      filename = "#{Unity.root}/config/#{name}.yml"
+      unless File.exist?(filename)
+        raise "Configuration file not found: #{filename}"
+      end
+
+      config_data = YAML.load(ERB.new(File.read(filename)).result(binding))
+      @file_configurations[name] = \
+        if config_data.is_a?(Hash)
+          config_data.fetch(Unity.env)
+        else
+          {}
+        end
     end
 
     def load_tasks
