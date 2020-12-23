@@ -42,6 +42,7 @@ require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/dynamo_date_range_with_time_id_query'
 require 'unity/utils/redis_service'
 require 'unity/utils/s3_service'
+require 'unity/utils/time_parser'
 
 Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
