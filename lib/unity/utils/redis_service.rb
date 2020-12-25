@@ -7,9 +7,9 @@ module Unity
         @connection_pool.with(&block)
       end
 
-      def method_missing(method_name, *args, &block)
+      def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
-          conn.__send__(method_name, *args, &block)
+          conn.__send__(method_name, *args, **kwargs, &block)
         end
       end
 
