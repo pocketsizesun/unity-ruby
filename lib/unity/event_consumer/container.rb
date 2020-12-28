@@ -5,7 +5,7 @@ module Unity
     class Container
       attr_reader :sqs, :sqs_queue_url, :concurrency, :workers_count, :health_check_pipes
 
-      WorkerSpec = Struct.new(:pid, :input, :output)
+      WorkerSpec = Struct.new(:name, :pid, :input, :output)
 
       def initialize(options = {})
         @queue_name = options.fetch(:queue)
@@ -31,14 +31,14 @@ module Unity
         @health_check_pipes = IO.pipe
 
         @workers_count.times do |worker_index|
-          worker_spec = spawn_worker
+          worker_spec = spawn_worker(worker_index.to_s)
           @workers_queue << worker_spec
           @workers[worker_index] = worker_spec
         end
 
         check_workers_health
 
-        Process.setproctitle("#{Unity.application.name}: [event-consumer] container ##{Process.pid}")
+        Process.setproctitle("event-consumer #{Unity::VERSION} [#{Unity.application.name}]")
         Unity.logger&.info "[event:consumer] start container (pid=#{Process.pid})"
         loop do
           break if @terminate == true
@@ -99,18 +99,18 @@ module Unity
       def replace_worker(worker)
         Process.kill('KILL', worker.pid)
         Process.waitpid2(worker.pid)
-        new_worker = spawn_worker
+        new_worker = spawn_worker(worker.name)
         worker.input = new_worker.input
         worker.output = new_worker.output
         worker.pid = new_worker.pid
       end
 
-      def spawn_worker
+      def spawn_worker(name)
         pipes = IO.pipe.tap { |arr| arr.each { |pipe| pipe.sync = true } }
         worker_pid = fork do
-          Unity::EventConsumer::Worker.run(self, pipes)
+          Unity::EventConsumer::Worker.run(name, self, pipes)
         end
-        WorkerSpec.new(worker_pid, pipes[1], pipes[0])
+        WorkerSpec.new(name, worker_pid, pipes[1], pipes[0])
       end
     end
   end

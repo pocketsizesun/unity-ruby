@@ -3,11 +3,12 @@
 module Unity
   module EventConsumer
     class Worker
-      def self.run(container, pipes)
-        new(container, pipes).run
+      def self.run(name, container, pipes)
+        new(name, container, pipes).run
       end
 
-      def initialize(container, pipes)
+      def initialize(name, container, pipes)
+        @name = name
         @container = container
         @input, @output = pipes
         @thread_pool = Concurrent::FixedThreadPool.new(container.concurrency)
@@ -23,7 +24,7 @@ module Unity
       end
 
       def run
-        Process.setproctitle("#{Unity.application.name}: [event-consumer] worker ##{Process.pid} (container=#{@parent_pid})")
+        Process.setproctitle("event-consumer: worker #{@name}: #{Process.pid} (container=#{@parent_pid})")
         Unity.logger&.info "[event:consumer] start worker (pid=#{Process.pid}, ppid=#{@parent_pid})"
         loop do
           begin
