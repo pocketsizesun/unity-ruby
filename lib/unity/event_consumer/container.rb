@@ -38,6 +38,7 @@ module Unity
 
         check_workers_health
 
+        Process.setproctitle("#{Unity.application.name}: [event-consumer] container ##{Process.pid}")
         Unity.logger&.info "[event:consumer] start container (pid=#{Process.pid})"
         loop do
           break if @terminate == true

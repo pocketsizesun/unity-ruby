@@ -23,6 +23,7 @@ module Unity
       end
 
       def run
+        Process.setproctitle("#{Unity.application.name}: [event-consumer] worker ##{Process.pid} (container=#{@parent_pid})")
         Unity.logger&.info "[event:consumer] start worker (pid=#{Process.pid}, ppid=#{@parent_pid})"
         loop do
           begin
