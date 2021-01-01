@@ -125,7 +125,7 @@ module Unity
       end
 
       operations.each do |k, v|
-          @operation_handlers[k] = @module.const_get(:Operations).const_get(v)
+        @operation_handlers[k] = @module.const_get(:Operations).const_get(v)
       rescue NameError
         raise "Operation class '#{v}' not found"
       end

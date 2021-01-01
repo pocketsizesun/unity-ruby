@@ -1,13 +1,19 @@
 GIT
-  remote: git@github.com:pocketsizesun/unity-urn-ruby.git
-  revision: e66b6124ade4b416be0fedce4caeffa3dfc97a01
+  remote: git@github.com:pocketsizesun/unity-logger-ruby.git
+  revision: b5714b2005ba229d3ba235876d9db1b985686a9f
   specs:
-    unity-urn (1.0.2)
+    unity-logger (1.0.0)
+
+GIT
+  remote: git@github.com:pocketsizesun/unity-urn-ruby.git
+  revision: 5f4b2bff7ef394309222304a81ac051d245b4a6c
+  specs:
+    unity-urn (1.0.3)
 
 PATH
   remote: .
   specs:
-    unity (1.3.1)
+    unity (1.4.0)
       aws-sdk-sns (~> 1.36)
       aws-sdk-sqs (~> 1.34)
       concurrent-ruby (~> 1.1)
@@ -18,6 +24,7 @@ PATH
       puma (~> 5.0)
       rack (~> 2.2)
       symbol-fstring
+      unity-logger
       unity-urn
 
 GEM
@@ -27,7 +34,7 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.1)
     aws-eventstream (1.1.0)
-    aws-partitions (1.409.0)
+    aws-partitions (1.414.0)
     aws-sdk-core (3.110.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.239.0)
@@ -66,7 +73,7 @@ GEM
     method_source (1.0.0)
     nio4r (2.5.4)
     parallel (1.20.1)
-    parser (2.7.2.0)
+    parser (3.0.0.0)
       ast (~> 2.4.1)
     pry (0.13.1)
       coderay (~> 1.1)
@@ -77,22 +84,22 @@ GEM
     rack (2.2.3)
     rainbow (3.0.0)
     rake (12.3.3)
-    regexp_parser (2.0.0)
+    regexp_parser (2.0.3)
     rexml (3.2.4)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
       rspec-mocks (~> 3.10.0)
-    rspec-core (3.10.0)
+    rspec-core (3.10.1)
       rspec-support (~> 3.10.0)
-    rspec-expectations (3.10.0)
+    rspec-expectations (3.10.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
-    rspec-mocks (3.10.0)
+    rspec-mocks (3.10.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
-    rspec-support (3.10.0)
-    rubocop (1.6.1)
+    rspec-support (3.10.1)
+    rubocop (1.7.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.5)
       rainbow (>= 2.2.2, < 4.0)
@@ -103,7 +110,7 @@ GEM
       unicode-display_width (>= 1.4.0, < 2.0)
     rubocop-ast (1.3.0)
       parser (>= 2.7.1.5)
-    ruby-progressbar (1.10.1)
+    ruby-progressbar (1.11.0)
     symbol-fstring (1.0.0)
     unf (0.1.4)
       unf_ext
@@ -118,7 +125,8 @@ DEPENDENCIES
   rspec (~> 3.0)
   rubocop
   unity!
+  unity-logger!
   unity-urn!
 
 BUNDLED WITH
-   2.1.4
+   2.2.3

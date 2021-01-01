@@ -32,11 +32,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
   spec.add_dependency 'http', '~> 4.4'
   spec.add_dependency 'connection_pool', '~> 2.2'
-  spec.add_dependency 'unity-urn'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'puma', '~> 5.0'
   spec.add_dependency 'symbol-fstring'
   spec.add_dependency 'dotenv', '~> 2.7'
   spec.add_dependency 'pry'
+  spec.add_dependency 'unity-urn'
+  spec.add_dependency 'unity-logger'
   spec.add_development_dependency 'rubocop'
 end
