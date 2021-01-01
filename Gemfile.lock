@@ -1,8 +1,8 @@
 GIT
   remote: git@github.com:pocketsizesun/unity-logger-ruby.git
-  revision: b5714b2005ba229d3ba235876d9db1b985686a9f
+  revision: ef2e7b188b75ca7027aa642a7b3365a8aef26cdd
   specs:
-    unity-logger (1.0.0)
+    unity-logger (1.0.1)
 
 GIT
   remote: git@github.com:pocketsizesun/unity-urn-ruby.git
