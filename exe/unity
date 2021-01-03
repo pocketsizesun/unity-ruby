@@ -70,6 +70,17 @@ when 'event:consumer'
   require 'unity/event_consumer'
 
   Unity::EventConsumer.run(options)
+when 'app:check'
+  require_relative "#{Dir.pwd}/config/boot.rb"
+
+  Unity.logger.info(
+    'message' => '[app:check] succeeded!',
+    'operations_count' => Unity.application.operations.length,
+    'event_handlers_count' => Unity.application.event_handlers.length,
+    'policies_count' => Unity.application.policies.length
+  )
+
+  exit 0
 else
   exec '/usr/bin/env', 'bundle', 'exec', 'rake', *orig_args
 end
