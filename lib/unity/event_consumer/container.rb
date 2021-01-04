@@ -12,6 +12,7 @@ module Unity
         @event_handlers = Unity.application.event_handlers
         @workers_count = options.fetch(:workers_count, 2)
         @concurrency = options.fetch(:concurrency, 2)
+        @pull_timeout = options.fetch(:pull_timeout, 20).to_i
         @workers_queue = Queue.new
         @workers = {}
         @workers_pids = []
@@ -45,7 +46,7 @@ module Unity
 
           sqs_recv_result = @sqs.receive_message(
             queue_url: @sqs_queue_url,
-            wait_time_seconds: 8
+            wait_time_seconds: @pull_timeout
           )
           Unity.logger&.debug "SQS receive messages count: #{sqs_recv_result.messages.length}"
           sqs_recv_result.messages.each do |message|

@@ -58,6 +58,10 @@ when 'event:consumer'
     opts.on('--reload', 'Auto-reload when file changes') do
       options[:reload] = true
     end
+
+    opts.on('--pull-timeout=VALUE', 'Pull timeout (ReceiveWaitTimeInSeconds), max. 20') do |v|
+      options[:pull_timeout] = v.to_i
+    end
   end.parse!
 
   abort '[event:consumer] Queue not specified' if options[:queue].nil?
