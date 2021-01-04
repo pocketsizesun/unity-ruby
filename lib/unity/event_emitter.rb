@@ -31,6 +31,11 @@ module Unity
             }
           )
         end
+
+        Unity.logger&.debug(
+          'message' => "emit event '#{event.name}'",
+          'event_data' => event.data
+        )
       end
     end
   end
