@@ -29,11 +29,10 @@ module Unity
 
         Unity.logger&.fatal(
           'message' => "service exception: #{e.class}",
-          'data' => {
-            'exception_id' => exception_id,
-            'exception_message' => e.message,
-            'exception_backtrace' => e.backtrace
-          }
+          'exception_id' => exception_id,
+          'exception_message' => e.message,
+          'exception_backtrace' => e.backtrace,
+          'operation_input' => env['unity.operation_input']
         )
         if Unity.application.config.report_exception == true
           [
