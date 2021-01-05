@@ -6,18 +6,19 @@ module Unity
 
     def self.inherited(base)
       super
-      shoryuken_options({ auto_delete: true, body_parser: :json })
+      shoryuken_options(auto_delete: true)
     end
 
     def self.queue=(arg)
       shoryuken_options(queue: arg.to_s)
     end
 
-    def perform(_sqs_msg, data)
-      call(data)
+    def perform(_sqs_msg, body)
+      args = JSON.parse(body)
+      call(*args)
     end
 
-    def call(data)
+    def call(*args)
       raise "#call not implemented in #{self.class}"
     end
   end
