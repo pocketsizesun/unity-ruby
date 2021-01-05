@@ -39,5 +39,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'pry'
   spec.add_dependency 'unity-urn'
   spec.add_dependency 'unity-logger'
+  spec.add_dependency 'shoryuken'
   spec.add_development_dependency 'rubocop'
 end

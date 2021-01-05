@@ -34,6 +34,7 @@ require 'unity/middlewares/authentication_middleware'
 require 'unity/middlewares/health_check_middleware'
 require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/request_parser_middleware'
+require 'unity/worker'
 
 # utils
 require 'unity/utils/dynamo_service'

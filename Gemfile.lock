@@ -13,7 +13,7 @@ GIT
 PATH
   remote: .
   specs:
-    unity (1.4.3)
+    unity (1.4.4)
       aws-sdk-sns (~> 1.36)
       aws-sdk-sqs (~> 1.34)
       concurrent-ruby (~> 1.1)
@@ -23,6 +23,7 @@ PATH
       pry
       puma (~> 5.0)
       rack (~> 2.2)
+      shoryuken
       symbol-fstring
       unity-logger
       unity-urn
@@ -111,7 +112,12 @@ GEM
     rubocop-ast (1.3.0)
       parser (>= 2.7.1.5)
     ruby-progressbar (1.11.0)
+    shoryuken (5.0.6)
+      aws-sdk-core (>= 2)
+      concurrent-ruby
+      thor
     symbol-fstring (1.0.0)
+    thor (1.0.1)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
