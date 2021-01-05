@@ -19,7 +19,7 @@ module Unity
           500,
           { 'content-type' => 'application/json' },
           [
-            { 'error' => "JSON parser error: #{e.message}" }
+            { 'error' => "JSON parser error: #{e.message}" }.to_json
           ]
         ]
       end
