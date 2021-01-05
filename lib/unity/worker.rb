@@ -4,16 +4,13 @@ module Unity
   class Worker
     include Shoryuken::Worker
 
-    def self.perform_in(delay, *args)
-      super(delay, JSON.dump(args))
+    def self.inherited(base)
+      super
+      shoryuken_options({ auto_delete: true, body_parser: :json })
     end
 
-    def self.perform_at(delay, *args)
-      super(delay, JSON.dump(args))
-    end
-
-    def self.perform_async(*args)
-      super(JSON.dump(args))
+    def self.queue=(arg)
+      shoryuken_options(queue: arg.to_s)
     end
   end
 end
