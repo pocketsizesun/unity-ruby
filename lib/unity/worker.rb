@@ -12,5 +12,13 @@ module Unity
     def self.queue=(arg)
       shoryuken_options(queue: arg.to_s)
     end
+
+    def perform(_sqs_msg, data)
+      call(data)
+    end
+
+    def call(data)
+      raise "#call not implemented in #{self.class}"
+    end
   end
 end
