@@ -13,7 +13,16 @@ module Unity
       shoryuken_options(queue: arg.to_s)
     end
 
+    def self.enqueue(*args)
+      perform_async(JSON.dump(args))
+    end
+
+    def self.enqueue_in(delay, *args)
+      perform_in(delay, JSON.dump(args))
+    end
+
     def perform(_sqs_msg, body)
+      p body
       args = JSON.parse(body)
       call(*args)
     end
