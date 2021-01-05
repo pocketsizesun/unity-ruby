@@ -14,15 +14,17 @@ module Unity
     end
 
     def self.enqueue(*args)
+      Unity.logger&.debug "enqueue job '#{self.class}' with arguments '#{args.inspect}'"
       perform_async(JSON.dump(args))
     end
 
     def self.enqueue_in(delay, *args)
+      Unity.logger&.debug "enqueue job '#{self.class}' with arguments '#{args.inspect}' (delay=#{delay})"
       perform_in(delay, JSON.dump(args))
     end
 
     def perform(_sqs_msg, body)
-      p body
+      Unity.logger&.debug "perform job '#{self.class}' with body '#{body}'"
       args = JSON.parse(body)
       call(*args)
     end
