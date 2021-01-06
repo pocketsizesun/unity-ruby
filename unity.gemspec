@@ -29,6 +29,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'aws-sdk-sns', '~> 1.36'
   spec.add_dependency 'aws-sdk-sqs', '~> 1.34'
+  spec.add_dependency 'aws-sdk-dynamodb-attribute-deserializer', '~> 1.0'
+  spec.add_dependency 'aws-sdk-dynamodbstreams-event-parser', '~> 1.0'
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
   spec.add_dependency 'http', '~> 4.4'
   spec.add_dependency 'connection_pool', '~> 2.2'

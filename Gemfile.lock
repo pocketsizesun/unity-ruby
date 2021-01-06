@@ -13,7 +13,9 @@ GIT
 PATH
   remote: .
   specs:
-    unity (1.4.6)
+    unity (1.4.7)
+      aws-sdk-dynamodb-attribute-deserializer (~> 1.0)
+      aws-sdk-dynamodbstreams-event-parser (~> 1.0)
       aws-sdk-sns (~> 1.36)
       aws-sdk-sqs (~> 1.34)
       concurrent-ruby (~> 1.1)
@@ -41,6 +43,9 @@ GEM
       aws-partitions (~> 1, >= 1.239.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
+    aws-sdk-dynamodb-attribute-deserializer (1.0)
+    aws-sdk-dynamodbstreams-event-parser (1.0.0)
+      aws-sdk-dynamodb-attribute-deserializer (~> 1.0)
     aws-sdk-sns (1.36.0)
       aws-sdk-core (~> 3, >= 3.109.0)
       aws-sigv4 (~> 1.1)
