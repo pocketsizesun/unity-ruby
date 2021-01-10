@@ -4,10 +4,7 @@ module Unity
   class EventWorker
     include Shoryuken::Worker
 
-    shoryuken_options(
-      auto_delete: true,
-      queue: Unity.application.config.event_worker_queue
-    )
+    shoryuken_options auto_delete: true
 
     def self.queue=(arg)
       shoryuken_options(queue: arg.to_s)

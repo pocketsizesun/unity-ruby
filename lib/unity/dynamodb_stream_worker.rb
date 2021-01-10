@@ -7,15 +7,16 @@ module Unity
   class DynamoDBStreamWorker
     include Shoryuken::Worker
 
+    shoryuken_options auto_delete: true
+
     HOOK_TYPES = {
       'INSERT' => :insert,
       'REMOVE' => :remove,
       'MODIFY' => :update
     }.freeze
 
-    def self.inherited(base)
-      super
-      shoryuken_options(auto_delete: true)
+    def self.configure(&block)
+      instance_exec(&block)
     end
 
     def self.event_parser

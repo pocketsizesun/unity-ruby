@@ -139,16 +139,18 @@ module Unity
       end
 
       # event worker
-      if config.event_worker_enabled == true
-        require 'unity/event_worker'
+      unless config.event_worker_queue.nil?
+        Unity::EventWorker.queue = config.event_worker_queue
       end
 
-      # dynamodb stream worker
-      unless config.dynamodb_stream_worker.nil?
-        require 'unity/dynamodb_stream_worker'
-        Unity::DynamoDBStreamWorker.instance_exec(&config.dynamodb_stream_worker)
+      # run initializers
+      Dir.glob("#{Unity.root}/config/initializers/*.rb").each do |item|
+        file = File.basename(item)
+        Unity.logger&.debug "load initializer file: #{file}"
+        require "#{Unity.root}/config/initializers/#{file}"
       end
 
+      # build rack app
       @rack_app = build_rack_app
     end
 
