@@ -74,7 +74,7 @@ module Unity
       end
 
       def on_remove(handler = nil, &block)
-        on(:delete, handler || block)
+        on(:remove, handler || block)
       end
 
       def on_update(handler = nil, &block)
