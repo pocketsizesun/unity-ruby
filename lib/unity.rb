@@ -37,7 +37,6 @@ require 'unity/middlewares/health_check_middleware'
 require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/request_parser_middleware'
 require 'unity/worker'
-require 'unity/dynamodb_stream_worker'
 
 # utils
 require 'unity/utils/callable'
