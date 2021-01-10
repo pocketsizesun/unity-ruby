@@ -38,6 +38,7 @@ require 'unity/middlewares/request_parser_middleware'
 require 'unity/worker'
 
 # utils
+require 'unity/utils/callable'
 require 'unity/utils/dynamo_service'
 require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/dynamo_date_range_with_time_id_query'
