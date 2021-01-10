@@ -15,6 +15,10 @@ module Unity
     end
 
     def emit(type, data = {})
+      emit_with_source(source, type, data)
+    end
+
+    def emit_with_source(source, type, data = {})
       Unity::Event.new(name: "#{source}:#{type}", data: data).tap do |event|
         @connection_pool.with do |conn|
           conn.publish(

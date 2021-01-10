@@ -35,8 +35,12 @@ module Unity
       }
     end
 
-    def to_json
-      as_data.to_json
+    def as_json
+      as_data
+    end
+
+    def to_json(*args)
+      as_data.to_json(*args)
     end
 
     def to_h

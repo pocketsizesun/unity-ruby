@@ -35,45 +35,6 @@ when 'server', 's'
   else
     exec '/usr/bin/env', 'bundle', 'exec', 'puma'
   end
-when 'event:consumer'
-  options = { reload: false, concurrency: 2, workers_count: 2 }
-  argv_dup = ARGV.dup.reject { |v| v == '--reload' }
-  OptionParser.new do |opts|
-    opts.on('-e', '--environment=NAME', 'Application environment (default: development)') do |v|
-      ENV['UNITY_ENV'] = v.to_s
-    end
-
-    opts.on('-q', '--queue=NAME', 'Event stream SQS queue name') do |v|
-      options[:queue] = v.to_s
-    end
-
-    opts.on('-c', '--concurrency=COUNT', 'Number of threads per worker (default: 2)') do |v|
-      options[:concurrency] = v.to_i
-    end
-
-    opts.on('-w', '--workers=COUNT', 'Number of workers (default: 2)') do |v|
-      options[:workers_count] = v.to_i
-    end
-
-    opts.on('--reload', 'Auto-reload when file changes') do
-      options[:reload] = true
-    end
-
-    opts.on('--pull-timeout=VALUE', 'Pull timeout (ReceiveWaitTimeInSeconds), max. 20') do |v|
-      options[:pull_timeout] = v.to_i
-    end
-  end.parse!
-
-  abort '[event:consumer] Queue not specified' if options[:queue].nil?
-
-  if options[:reload] == true
-    exec '/usr/bin/env', 'bundle', 'exec', 'rerun', "bundle exec unity event:consumer #{argv_dup.join(' ')}"
-  end
-
-  require_relative "#{Dir.pwd}/config/boot.rb"
-  require 'unity/event_consumer'
-
-  Unity::EventConsumer.run(options)
 when 'app:check'
   require_relative "#{Dir.pwd}/config/boot.rb"
 

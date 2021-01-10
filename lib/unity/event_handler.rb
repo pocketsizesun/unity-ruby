@@ -7,7 +7,6 @@ module Unity
     end
 
     def call(event)
-
     end
   end
 end

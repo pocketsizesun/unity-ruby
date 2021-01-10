@@ -138,6 +138,17 @@ module Unity
         @event_handler_instances[k] = @module.const_get(:EventHandlers).const_get(v).new
       end
 
+      # event worker
+      if config.event_worker_enabled == true
+        require 'unity/event_worker'
+      end
+
+      # dynamodb stream worker
+      unless config.dynamodb_stream_worker.nil?
+        require 'unity/dynamodb_stream_worker'
+        Unity::DynamoDBStreamWorker.instance_exec(&config.dynamodb_stream_worker)
+      end
+
       @rack_app = build_rack_app
     end
 
