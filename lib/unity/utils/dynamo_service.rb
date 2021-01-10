@@ -29,6 +29,48 @@ module Unity
         end
       end
 
+      def put_item(params)
+        @connection_pool.with do |conn|
+          conn.put_item(params)
+        end
+      end
+
+      def update_item(params)
+        @connection_pool.with do |conn|
+          conn.update_item(params)
+        end
+      end
+
+      def delete_item(params)
+        @connection_pool.with do |conn|
+          conn.delete_item(params)
+        end
+      end
+
+      def transact_write_items(params)
+        @connection_pool.with do |conn|
+          conn.transact_write_items(params)
+        end
+      end
+
+      def scan(params)
+        @connection_pool.with do |conn|
+          conn.scan(params)
+        end
+      end
+
+      def batch_get_item(params)
+        @connection_pool.with do |conn|
+          conn.batch_get_item(params)
+        end
+      end
+
+      def batch_write_item(params)
+        @connection_pool.with do |conn|
+          conn.batch_write_item(params)
+        end
+      end
+
       def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, **kwargs, &block)
