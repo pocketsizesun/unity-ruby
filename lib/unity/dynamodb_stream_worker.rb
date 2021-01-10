@@ -41,10 +41,18 @@ module Unity
         'body' => body
       )
       event = self.class.event_parser.parse(body)
-      call(event)
+      process_event(event)
+    rescue StandardError => e
+      Unity.logger&.fatal(
+        'error' => e.message,
+        'exception_klass' => e.class.to_s,
+        'exception_backtrace' => e.backtrace,
+        'event_body' => body
+      )
+      raise e
     end
 
-    def call(event)
+    def process_event(event)
       event_source_arn_split = event.event_source_arn.split(':', 6)
       table_name = event_source_arn_split[5].split('/').at(1)
       unless self.class.table_handlers.key?(table_name)
