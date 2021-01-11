@@ -2,6 +2,8 @@
 
 module Unity
   class Coordination
+    attr_accessor :table_name
+
     DEFAULT_TTL = 86_400
     DEFAULT_LOCK_TTL = 60
     LOCK_EXPR_ATTRIBUTE_NAMES = { '#ttl' => 'ttl' }.freeze
@@ -32,15 +34,16 @@ module Unity
       @table_name = arg.to_s
     end
 
-    def initialize(owner = Socket.gethostname)
+    def initialize(owner = Socket.gethostname, table_name: nil)
       @owner = owner
+      @table_name = table_name || self.class.table_name
     end
 
     def lock(name, **kwargs)
       now = current_time
       row = Row.new(name, nil, nil)
       result = Unity::Utils::DynamoService.instance.update_item(
-        table_name: self.class.table_name,
+        table_name: @table_name,
         key: { 'n' => row.name },
         condition_expression: '(attribute_not_exists(l_until) OR l_until < :l_until) OR (l_owner = :l_owner)',
         expression_attribute_names: LOCK_EXPR_ATTRIBUTE_NAMES,
@@ -61,7 +64,7 @@ module Unity
     def write(name, data, **kwargs)
       now = current_time
       Unity::Utils::DynamoService.instance.update_item(
-        table_name: self.class.table_name,
+        table_name: @table_name,
         key: { 'n' => name },
         update_expression: 'SET #data = :data, #ttl = :ttl',
         condition_expression: 'attribute_exists(l_until) AND l_until > :now AND l_owner = :l_owner',
@@ -85,7 +88,7 @@ module Unity
     def release(name)
       now = current_time
       Unity::Utils::DynamoService.instance.update_item(
-        table_name: self.class.table_name,
+        table_name: @table_name,
         key: { 'n' => name },
         update_expression: RELEASE_UPDATE_EXPR,
         condition_expression: 'attribute_exists(l_until) AND l_until >= :now AND l_owner = :l_owner',
@@ -99,7 +102,7 @@ module Unity
     def refresh!(name, extend_time = 10)
       now = current_time
       Unity::Utils::DynamoService.instance.update_item(
-        table_name: self.class.table_name,
+        table_name: @table_name,
         key: { 'n' => name },
         update_expression: 'SET l_until = :l_until',
         condition_expression: 'attribute_exists(l_until) AND l_until > :now AND l_owner = :l_owner',

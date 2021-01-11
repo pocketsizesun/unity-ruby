@@ -13,7 +13,7 @@ GIT
 PATH
   remote: .
   specs:
-    unity (1.6.5.1)
+    unity (1.6.6)
       aws-sdk-dynamodb-attribute-deserializer (~> 1.0)
       aws-sdk-dynamodbstreams-event-parser (~> 1.0)
       aws-sdk-sns (~> 1.36)

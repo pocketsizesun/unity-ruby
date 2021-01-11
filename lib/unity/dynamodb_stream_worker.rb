@@ -42,7 +42,7 @@ module Unity
       )
       event = self.class.event_parser.parse(body)
       process_event(event)
-    rescue StandardError => e
+    rescue Exception => e
       Unity.logger&.fatal(
         'error' => e.message,
         'exception_klass' => e.class.to_s,

@@ -23,7 +23,7 @@ module Unity
       end
       event_handler.call(event)
       true
-    rescue StandardError => e
+    rescue Exception => e
       Unity.logger&.fatal(
         'error' => e.message,
         'exception_klass' => e.class.to_s,
