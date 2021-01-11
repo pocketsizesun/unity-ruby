@@ -23,6 +23,14 @@ module Unity
       end
       event_handler.call(event)
       true
+    rescue StandardError => e
+      Unity.logger&.fatal(
+        'error' => e.message,
+        'exception_klass' => e.class.to_s,
+        'exception_backtrace' => e.backtrace,
+        'event_body' => body
+      )
+      raise e
     end
   end
 end
