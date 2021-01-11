@@ -19,11 +19,25 @@ module Unity
     end
 
     def initialize(attributes = {})
-      @id = attributes.fetch(:id) { SecureRandom.uuid }
       @date = attributes.fetch(:date) { Time.now }
       @name = attributes.fetch(:name)
       @data = attributes.fetch(:data) { Hash.new }
+      @id = attributes.fetch(:id) do
+        Base64.urlsafe_encode64(
+          Digest::SHA256.digest([@date, @name, @data].to_json)
+        ).slice(0, 43)
+      end
       @namespace, @type = @name.split(':')
+    end
+
+    def deduplication_id
+      Base64.urlsafe_encode64(
+        Digest::SHA256.digest([@name, @data].to_json)
+      ).slice(0, 43)
+    end
+
+    def content_sha256
+      Digest::SHA256.hexdigest(@data.to_json)
     end
 
     def as_data

@@ -25,6 +25,7 @@ require 'unity/time_id'
 require 'unity/logger'
 require 'unity/application'
 require 'unity/authentication'
+require 'unity/coordination'
 require 'unity/event'
 require 'unity/event_emitter'
 require 'unity/event_handler'
@@ -96,5 +97,9 @@ module Unity
     return nil unless Unity.application.config.event_emitter_enabled == true
 
     @event_emitter = Unity::EventEmitter.new(Unity.application.name)
+  end
+
+  def self.coordination
+    @coordination ||= Unity::Coordination.new
   end
 end
