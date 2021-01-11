@@ -115,7 +115,7 @@ module Unity
       raise RefreshError, self
     end
 
-    def with_lock(name, ttl: DEFAULT_TTL, max_retries: 3, retry_interval: 1)
+    def with_lock(name, ttl: DEFAULT_LOCK_TTL, max_retries: 3, retry_interval: 1)
       retry_count = 0
       begin
         row = lock!(name, ttl: ttl)
