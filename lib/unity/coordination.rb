@@ -17,12 +17,13 @@ module Unity
     Error = Class.new(StandardError) do
       attr_reader :lock
 
-      def initialize(lock)
-        @lock = lock
+      def initialize(name)
+        @name = name
       end
     end
     LockError = Class.new(Error)
     RefreshError = Class.new(Error)
+    WriteError = Class.new(Error)
 
     Row = Struct.new(:name, :data, :ttl)
 
@@ -76,13 +77,15 @@ module Unity
           ':data' => data
         }
       )
+    rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
+      raise WriteError, name
     end
 
     def lock!(name, **kwargs)
       row = lock(name, **kwargs)
       return row unless row.nil?
 
-      raise LockError, self
+      raise LockError, name
     end
 
     def release(name)
@@ -115,7 +118,7 @@ module Unity
       )
       true
     rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
-      raise RefreshError, self
+      raise RefreshError, name
     end
 
     def with_lock(name, ttl: DEFAULT_LOCK_TTL, max_retries: 3, retry_interval: 1)
