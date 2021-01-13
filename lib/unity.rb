@@ -103,11 +103,12 @@ module Unity
     @coordination ||= Unity::Coordination.new
   end
 
-  def self.report_exception(&_block)
+  def self.report_exception(name = nil, &_block)
     yield
   rescue Exception => e
     Unity.logger&.fatal(
       'error' => e.message,
+      'report_exception_name' => name,
       'exception_klass' => e.class.to_s,
       'exception_backtrace' => e.backtrace
     )
