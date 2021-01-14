@@ -150,6 +150,11 @@ module Unity
         require "#{Unity.root}/config/initializers/#{file}"
       end
 
+      # change Shoryuken logger
+      if defined?(Shoryuken)
+        Shoryuken::Logging.logger = logger || Logger.new('/dev/null')
+      end
+
       # build rack app
       @rack_app = build_rack_app
     end
