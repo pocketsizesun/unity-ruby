@@ -150,9 +150,12 @@ module Unity
         require "#{Unity.root}/config/initializers/#{file}"
       end
 
-      # change Shoryuken logger
+      # Configure Shoryuken defaults
+      # - change Shoryuken logger
+      # - cache visibility timeout by default
       if defined?(Shoryuken)
         Shoryuken::Logging.logger = logger || Logger.new('/dev/null')
+        Shoryuken.cache_visibility_timeout = true
       end
 
       # build rack app
