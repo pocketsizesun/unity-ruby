@@ -4,7 +4,6 @@ module Unity
   # Date-relative UUID generation.
   class TimeId
     NUM_RANDOM_BITS = 23
-    MAX_TIME_USEC = Rational(999999, 1)
 
     # Generates a time-sortable, 64-bit UUID.
     #
@@ -19,10 +18,7 @@ module Unity
     end
 
     def self.from(time)
-      ms = (time.to_f * 1e3).round
-      rand = (SecureRandom.random_number * 1e16).round
-      id = ms << NUM_RANDOM_BITS
-      id | rand % (2 ** NUM_RANDOM_BITS)
+      ((time.to_f * 1e3).round << NUM_RANDOM_BITS) | (SecureRandom.random_number * 1e16).round % (2 ** NUM_RANDOM_BITS)
     end
 
     # Determines when a given UUID was generated.
@@ -34,8 +30,7 @@ module Unity
     #   Druuid.time 11142943683383068069
     #   # => 2012-02-04 00:00:00 -0800
     def self.time(id)
-      ms = id >> NUM_RANDOM_BITS
-      Time.at(ms / 1e3)
+      Time.at((id >> NUM_RANDOM_BITS) / 1e3)
     end
 
     def self.date_as_string(id)
@@ -51,8 +46,11 @@ module Unity
     #   Druuid.min_for_time
     #   # => 11142943683379200000
     def self.min_for_time(time = Time.now)
-      ms = (time.round.to_i * 1e3).to_i
-      ms << NUM_RANDOM_BITS
+      (time.round.to_i * 1e3).to_i << NUM_RANDOM_BITS
+    end
+
+    def self.min(time = Time.now)
+      from(time) >> NUM_RANDOM_BITS << NUM_RANDOM_BITS
     end
 
     # Determines the maximum UUID that could be generated for the given time.

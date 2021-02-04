@@ -35,9 +35,10 @@ module Unity
       @table_name = arg.to_s
     end
 
-    def initialize(owner = Socket.gethostname, table_name: nil)
-      @owner = owner
+    def initialize(owner = nil, table_name: nil)
+      @owner = owner || "#{Socket.gethostname}-#{Process.pid}"
       @table_name = table_name || self.class.table_name
+      @mutex = Mutex.new
     end
 
     def lock(name, **kwargs)
@@ -46,11 +47,12 @@ module Unity
       result = Unity::Utils::DynamoService.instance.update_item(
         table_name: @table_name,
         key: { 'n' => row.name },
-        condition_expression: '(attribute_not_exists(l_until) OR l_until < :l_until) OR (l_owner = :l_owner)',
+        condition_expression: '(attribute_not_exists(l_until) OR l_until < :now) OR (l_owner = :l_owner)',
         expression_attribute_names: LOCK_EXPR_ATTRIBUTE_NAMES,
         expression_attribute_values: {
           ':l_until' => now + (kwargs[:ttl] || DEFAULT_LOCK_TTL),
-          ':l_owner' => @owner
+          ':l_owner' => @owner,
+          ':now' => current_time
         },
         update_expression: 'SET l_owner = :l_owner, l_until = :l_until, #ttl = if_not_exists(#ttl, :l_until)',
         return_values: 'ALL_NEW'
@@ -122,18 +124,20 @@ module Unity
     end
 
     def with_lock(name, ttl: DEFAULT_LOCK_TTL, max_retries: 3, retry_interval: 1)
-      retry_count = 0
-      begin
-        row = lock!(name, ttl: ttl)
-        yield(row)
-        release(name)
-      rescue LockError => e
-        if retry_count < max_retries
-          retry_count += 1
-          sleep retry_interval
-          retry
+      @mutex.synchronize do
+        retry_count = 0
+        begin
+          row = lock!(name, ttl: ttl)
+          yield(row)
+          release(name)
+        rescue LockError => e
+          if retry_count < max_retries
+            retry_count += 1
+            sleep retry_interval
+            retry
+          end
+          raise e
         end
-        raise e
       end
     end
 
