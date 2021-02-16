@@ -7,6 +7,14 @@ module Unity
         @connection_pool.with(&block)
       end
 
+      def multi(&_block)
+        checkout do |conn|
+          conn.multi do
+            yield(conn)
+          end
+        end
+      end
+
       def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, **kwargs, &block)

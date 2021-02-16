@@ -34,7 +34,8 @@ module Unity
         auth_enabled: true,
         auth_endpoint: nil,
         log_level: Logger::INFO,
-        event_emitter_enabled: true
+        event_emitter_enabled: true,
+        middlewares: []
       )
       @rack_app = nil
       @file_configurations = {}
@@ -135,7 +136,7 @@ module Unity
       end
 
       event_handlers.each do |k, v|
-        @event_handler_instances[k] = @module.const_get(:EventHandlers).const_get(v).new
+        @event_handler_instances[k] = @module.const_get(:EventHandlers).const_get(v)
       end
 
       # event worker
@@ -207,6 +208,11 @@ module Unity
         end
 
         use Unity::Middlewares::RequestParserMiddleware
+
+        __self__.config.middlewares.each do |middleware|
+          use middleware, app: __self__
+        end
+
         if __self__.config.auth_enabled == true
           use Unity::Middlewares::AuthenticationMiddleware
         end
