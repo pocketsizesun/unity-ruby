@@ -33,8 +33,8 @@ module Unity
       raise EventDuplicatedError, event
     end
 
-    def publish(name, data = {}, date = Time.now)
-      Unity::Event.new(date: date, name: name, data: data).tap do |event|
+    def publish(name, data = {}, timestamp = Time.now)
+      Unity::Event.new(timestamp: timestamp, name: name, data: data).tap do |event|
         create(event)
       end
     end

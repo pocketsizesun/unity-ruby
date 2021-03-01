@@ -14,6 +14,10 @@ module Unity
       ) { client || Aws::SNS::Client.new }
     end
 
+    def publish(type, data = {}, timestamp = Time.now)
+      emit(type, data, timestamp)
+    end
+
     def emit(type, data = {}, timestamp = Time.now)
       Unity::Event.new(
         name: "#{@source}:#{type}", timestamp: timestamp, data: data
