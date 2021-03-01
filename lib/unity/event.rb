@@ -2,8 +2,9 @@
 
 module Unity
   class Event < Unity::Model
+    attribute :id, :string
     attribute :name, :string
-    attribute :timestamp, :datetime
+    attribute :timestamp, :datetime, default: -> { Time.now }
     attribute :data, default: -> { Hash.new }
 
     EventMalformatedError = Class.new(StandardError)
@@ -19,10 +20,23 @@ module Unity
       raise EventMalformatedError
     end
 
+    def self.from_dynamo_item(item)
+      new(
+        id: item['id'],
+        name: item['n'],
+        timestamp: Time.at(item['t'].to_i),
+        data: item['d']
+      )
+    end
+
     def id
-      Base64.urlsafe_encode64(
+      @id ||= Base64.urlsafe_encode64(
         Digest::SHA256.digest([timestamp, name, data].to_json)
       ).slice(0, 43)
+    end
+
+    def id=(arg)
+      @id = arg
     end
 
     def deduplication_id
