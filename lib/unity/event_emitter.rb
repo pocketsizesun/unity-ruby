@@ -14,24 +14,16 @@ module Unity
       ) { client || Aws::SNS::Client.new }
     end
 
-    def emit(type, data = {})
-      emit_with_source(source, type, data)
-    end
-
-    def emit_with_source(source, type, data = {})
-      Unity::Event.new(name: "#{source}:#{type}", data: data).tap do |event|
+    def emit(type, data = {}, timestamp = Time.now)
+      Unity::Event.new(
+        name: "#{@source}:#{type}", timestamp: timestamp, data: data
+      ).tap do |event|
         @connection_pool.with do |conn|
           conn.publish(
             topic_arn: @topic_arn,
-            message: event.to_json,
+            message: event.as_sns_notification.to_json,
             message_attributes: {
-              event_source_urn: {
-                data_type: 'String',
-                string_value: "urn:eventstream:source/#{@source}"
-              },
-              event_name: { data_type: 'String', string_value: event.name },
-              event_namespace: { data_type: 'String', string_value: event.namespace },
-              event_type: { data_type: 'String', string_value: event.type }
+              event_name: { data_type: 'String', string_value: event.name }
             }
           )
         end

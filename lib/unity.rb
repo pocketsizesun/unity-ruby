@@ -24,19 +24,21 @@ require 'unity/errors/event_handler_not_found'
 require 'unity/urn'
 require 'unity/time_id'
 require 'unity/logger'
+require 'unity/model'
+require 'unity/model_attributes/tagset_model_attribute'
 require 'unity/application'
 require 'unity/authentication'
 require 'unity/coordination'
 require 'unity/event'
 require 'unity/event_emitter'
 require 'unity/event_handler'
+require 'unity/event_store'
 require 'unity/event_worker'
 require 'unity/middleware'
 require 'unity/middlewares/authentication_middleware'
 require 'unity/middlewares/health_check_middleware'
 require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/request_parser_middleware'
-require 'unity/model'
 require 'unity/operation'
 require 'unity/operation_context'
 require 'unity/operation_policy'
@@ -100,6 +102,10 @@ module Unity
     return nil unless Unity.application.config.event_emitter_enabled == true
 
     @event_emitter = Unity::EventEmitter.new(Unity.application.name)
+  end
+
+  def self.event_store
+    @event_store ||= Unity::EventStore.new
   end
 
   def self.coordination
