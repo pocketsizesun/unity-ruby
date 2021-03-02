@@ -23,7 +23,7 @@ module Unity
 
     def create(event)
       Unity::Utils::DynamoService.instance.put_item(
-        table_name: TimeQueue::Event::TABLE_NAME,
+        table_name: @table_name,
         condition_expression: 'attribute_not_exists(#date) AND attribute_not_exists(#id)',
         expression_attribute_names: PUBLISH_EXPR_ATTRIBUTE_NAMES,
         item: event.as_dynamo_item
