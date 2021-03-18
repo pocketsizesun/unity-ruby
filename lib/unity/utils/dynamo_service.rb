@@ -22,6 +22,21 @@ module Unity
         end
       end
 
+      def count_all(params)
+        count = 0
+        params = params.merge(select: 'COUNT')
+        loop do
+          result = @connection_pool.with do |conn|
+            conn.query(params)
+          end
+          count += result.count
+          break if result.last_evaluated_key.nil?
+
+          params[:exclusive_start_key] = result.last_evaluated_key
+        end
+        count
+      end
+
       def query(params)
         @connection_pool.with do |conn|
           Unity.logger&.debug "[DynamoService] execute query: #{params.inspect}"
