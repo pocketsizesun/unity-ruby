@@ -10,7 +10,7 @@ module Unity
       shoryuken_options(queue: arg.to_s)
     end
 
-    def perform(_sqs_msg, body)
+    def perform(sqs_msg, body)
       Unity.logger&.debug "process event: #{body}"
       event = Unity::Event.parse(body)
       event_handler = Unity.application.find_event_handler(event.name)
@@ -23,6 +23,23 @@ module Unity
       end
       event_handler.call(event)
       true
+    rescue Unity::EventHandler::RetryExecution => e
+      if e.max_retries.nil? || sqs_msg.attributes['ApproximateReceiveCount'] < e.max_retries
+        Unity.logger&.warn(
+          'message' => "retry event execution: #{event.id}",
+          'event' => event,
+          'reason' => e.reason
+        )
+        raise e
+      else
+        Unity.logger&.warn(
+          'message' => "event '#{event.id}' execution has failed and will not be retried",
+          'event' => event,
+          'reason' => e.reason,
+          'retries' => sqs_msg.attributes['ApproximateReceiveCount'],
+          'max_retries' => e.max_retries
+        )
+      end
     rescue Exception => e
       Unity.logger&.fatal(
         'error' => e.message,

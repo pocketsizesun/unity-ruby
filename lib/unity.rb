@@ -42,6 +42,7 @@ require 'unity/middlewares/request_parser_middleware'
 require 'unity/operation'
 require 'unity/operation_context'
 require 'unity/operation_policy'
+require 'unity/record_handler'
 require 'unity/worker'
 
 # utils
