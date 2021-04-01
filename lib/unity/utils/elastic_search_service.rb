@@ -13,6 +13,14 @@ module Unity
         checkout { |conn| conn.cluster.health }
       end
 
+      def index(*args)
+        checkout { |conn| conn.index(*args) }
+      end
+
+      def delete(*args)
+        checkout { |conn| conn.delete(*args) }
+      end
+
       def search(*args)
         checkout do |conn|
           conn.search(*args)

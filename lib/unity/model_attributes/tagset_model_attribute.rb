@@ -8,8 +8,9 @@ module Unity
       def cast_value(value)
         case value
         when Hash
-          value.transform_keys(&:to_s).transform_values(&:to_s)
-        else {}
+          Unity::Utils::Tagset.new(value)
+        else
+          Hash.new
         end
       end
     end

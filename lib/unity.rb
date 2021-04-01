@@ -53,6 +53,7 @@ require 'unity/utils/dynamo_date_range_with_time_id_query'
 require 'unity/utils/elastic_search_service'
 require 'unity/utils/redis_service'
 require 'unity/utils/s3_service'
+require 'unity/utils/tagset'
 require 'unity/utils/time_parser'
 
 Encoding.default_internal = Encoding::UTF_8
