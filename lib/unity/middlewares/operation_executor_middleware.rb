@@ -23,7 +23,7 @@ module Unity
           'data' => e.data,
           'operation_input' => env['unity.operation_input']
         )
-        [400, { 'content-type' => 'application/json' }, [e.as_json.to_json]]
+        [400, { 'content-type' => 'application/json' }, [Oj.dump(e.as_json, mode: :compat)]]
       rescue => e
         exception_id = Unity::TimeId.random
 

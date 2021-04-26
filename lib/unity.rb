@@ -19,6 +19,7 @@ require 'rack/builder'
 require 'shoryuken'
 require 'active_model'
 require 'unity/version'
+require 'unity/configuration'
 require 'unity/error'
 require 'unity/errors/event_handler_not_found'
 require 'unity/urn'
@@ -125,5 +126,23 @@ module Unity
       'exception_backtrace' => e.backtrace
     )
     raise e
+  end
+
+  def self.gem_path
+    @gem_path ||= File.realpath(File.dirname(__FILE__) + '/../')
+  end
+
+  def self.load_tasks
+    Dir.glob("#{gem_path}/lib/tasks/{*,*/**}.rake").each do |filename|
+      load filename
+    end
+  end
+
+  def self.concurrency=(arg)
+    application.config.concurrency = arg.to_i
+  end
+
+  def self.concurrency
+    application.config.concurrency
   end
 end

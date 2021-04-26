@@ -115,7 +115,7 @@ module Unity
 
       def initialize
         @connection_pool = ConnectionPool.new(
-          pool_size: Unity.application.config.max_threads
+          pool_size: Unity.application.config.concurrency
         ) do
           Aws::DynamoDB::Client.new
         end

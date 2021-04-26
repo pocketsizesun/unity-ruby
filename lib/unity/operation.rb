@@ -32,7 +32,7 @@ module Unity
       end
 
       def to_json(*args)
-        @data.to_json(*args)
+        Oj.dump(@data, mode: :compat)
       end
     end
 

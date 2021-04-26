@@ -6,7 +6,7 @@ module Unity
       def initialize(app)
         @app = app
         @connection_pool = ConnectionPool.new(
-          size: Unity.application.config.max_threads.to_i,
+          size: Unity.application.config.concurrency.to_i,
           timeout: Unity.application.config.auth_connection_timeout.to_i
         ) do
           Unity::Authentication::Client.new(config.auth_endpoint)

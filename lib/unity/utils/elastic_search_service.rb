@@ -13,8 +13,16 @@ module Unity
         checkout { |conn| conn.cluster.health }
       end
 
+      def create_index(parameters = {})
+        checkout { |conn| conn.indices.create(parameters) }
+      end
+
       def index(*args)
         checkout { |conn| conn.index(*args) }
+      end
+
+      def bulk(*args)
+        checkout { |conn| conn.bulk(*args) }
       end
 
       def delete(*args)
@@ -31,7 +39,7 @@ module Unity
 
       def initialize
         @connection_pool = ConnectionPool.new(
-          pool_size: Unity.application&.config&.max_threads&.to_i || 4
+          pool_size: Unity.application&.config&.concurrency&.to_i || 4
         ) do
           Elasticsearch::Client.new(
             Unity.application&.config&.elasticsearch_options || {}

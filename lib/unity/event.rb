@@ -31,7 +31,7 @@ module Unity
 
     def id
       @id ||= Base64.urlsafe_encode64(
-        Digest::SHA256.digest([timestamp, name, data].to_json)
+        Digest::SHA256.digest(Oj.dump([timestamp, name, data], mode: :compat))
       ).slice(0, 43)
     end
 
@@ -41,12 +41,12 @@ module Unity
 
     def deduplication_id
       Base64.urlsafe_encode64(
-        Digest::SHA256.digest([name, data].to_json)
+        Digest::SHA256.digest(Oj.dump([name, data], mode: :compat))
       ).slice(0, 43)
     end
 
     def content_sha256
-      Digest::SHA256.hexdigest(data.to_json)
+      Digest::SHA256.hexdigest(Oj.dump(data, mode: :compat))
     end
 
     def as_sns_notification

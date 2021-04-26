@@ -25,7 +25,7 @@ module Unity
         @connection_pool.with do |conn|
           conn.publish(
             topic_arn: @topic_arn,
-            message: event.as_sns_notification.to_json,
+            message: Oj.dump(event.as_sns_notification, mode: :compat),
             message_attributes: {
               event_name: { data_type: 'String', string_value: event.name }
             }

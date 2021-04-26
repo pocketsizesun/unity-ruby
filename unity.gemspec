@@ -39,9 +39,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'puma', '~> 5.0'
   spec.add_dependency 'symbol-fstring'
   spec.add_dependency 'dotenv', '~> 2.7'
-  spec.add_dependency 'pry'
+  spec.add_dependency 'pry', '~> 0.14'
   spec.add_dependency 'unity-urn'
   spec.add_dependency 'unity-logger'
-  spec.add_dependency 'shoryuken'
+  spec.add_dependency 'shoryuken', '~> 5.2'
+  spec.add_dependency 'oj', '~> 3.11'
   spec.add_development_dependency 'rubocop'
 end

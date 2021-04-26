@@ -29,10 +29,7 @@ module Unity
       # @param [Rack::Request] request
       # @return [Hash]
       def parse_request_body(request)
-        body = request.body.read.to_s
-        return {} if body.empty?
-
-        JSON.parse(body)
+        Oj.load(request.body) || {}
       end
     end
   end

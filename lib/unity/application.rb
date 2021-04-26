@@ -25,18 +25,7 @@ module Unity
       @event_handlers = {}
       @initialized_at = Time.now.to_i
       @authentication_client_pool = nil
-      @config = OpenStruct.new(
-        autoload_paths: ['lib'],
-        auth_namespace: nil,
-        time_zone: 'UTC',
-        max_threads: 4,
-        auth_connection_timeout: 5,
-        auth_enabled: true,
-        auth_endpoint: nil,
-        log_level: Logger::INFO,
-        event_emitter_enabled: true,
-        middlewares: []
-      )
+      @config = Unity::Configuration.new
       @rack_app = nil
       @file_configurations = {}
     end
@@ -111,7 +100,7 @@ module Unity
       # init auth client pool
       if config.auth_enabled == true
         @authentication_client_pool = ConnectionPool.new(
-          size: config.max_threads.to_i,
+          size: config.concurrency.to_i,
           timeout: config.auth_connection_timeout.to_i
         ) do
           Unity::Authentication::Client.new(config.auth_endpoint)
