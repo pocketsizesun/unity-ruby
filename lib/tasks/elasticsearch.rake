@@ -127,6 +127,7 @@ namespace :elasticsearch do
       end
       selected_indexes.keys.each do |index_name|
         conn.indices.delete(index: index_name)
+        puts "|> Delete index: #{index_name}"
       end
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       []
