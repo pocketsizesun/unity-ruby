@@ -116,4 +116,20 @@ namespace :elasticsearch do
     Rake::Task['elasticsearch:import'].invoke
     Rake::Task['elasticsearch:configure_alias'].invoke
   end
+
+  task :cleanup_indexes do
+    index_spec = elasticsearch_model_index_spec_for(ENV.fetch('CLASS_NAME'))
+
+    Unity::Utils::ElasticSearchService.instance.checkout do |conn|
+      res = conn.indices.get(index: "#{index_spec.name}-*")
+      selected_indexes = res.select do |k, v|
+        v['aliases'].empty?
+      end
+      selected_indexes.keys.each do |index_name|
+        conn.indices.delete(index: index_name)
+      end
+    rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      []
+    end
+  end
 end
