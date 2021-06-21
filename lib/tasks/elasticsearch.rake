@@ -86,12 +86,12 @@ namespace :elasticsearch do
     Unity.concurrency = 1
 
     index_spec = elasticsearch_model_index_spec_for(ENV.fetch('CLASS_NAME'))
-    index_spec.versioned_name = ENV.fetch('VERSIONED_INDEX_NAME')
+    index_name = ENV.fetch('INDEX_NAME')
 
     processed_count = 0
     index_spec.model_klass.all.each_slice(100) do |items|
       Unity::Utils::ElasticSearchService.instance.bulk(
-        index: index_spec.versioned_name,
+        index: index_name,
         body: items.collect do |item|
           {
             'index' => {
@@ -111,9 +111,15 @@ namespace :elasticsearch do
     index_spec = elasticsearch_model_index_spec_for(ENV.fetch('CLASS_NAME'))
     ENV['VERSIONED_INDEX_NAME'] = index_spec.versioned_name
 
+    # create a new index
     puts "|> Using versioned index name: #{index_spec.versioned_name}"
     Rake::Task['elasticsearch:create_index'].invoke
+
+    # import all data
+    ENV['INDEX_NAME'] = index_spec.versioned_name
     Rake::Task['elasticsearch:import'].invoke
+
+    # configure alias
     Rake::Task['elasticsearch:configure_alias'].invoke
   end
 

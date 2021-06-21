@@ -15,6 +15,16 @@ module Unity
         end
       end
 
+      def silent(&block)
+        checkout(&block)
+      rescue Redis::Error => e
+        Unity.logger&.error(
+          'message' => "redis error: #{e.message}",
+          'exception_klass' => e.class.to_s,
+          'exception_backtrace' => e.backtrace
+        )
+      end
+
       def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, **kwargs, &block)
