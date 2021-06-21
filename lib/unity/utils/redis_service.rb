@@ -23,6 +23,7 @@ module Unity
           'exception_klass' => e.class.to_s,
           'exception_backtrace' => e.backtrace
         )
+        nil
       end
 
       def method_missing(method_name, *args, **kwargs, &block)
