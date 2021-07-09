@@ -1,0 +1,19 @@
+source 'https://rubygems.org'
+
+gem 'unity', git: 'git@github.com:pocketsizesun/unity-ruby.git', tag: 'v1.8.4'
+gem 'unity-urn', git: 'git@github.com:pocketsizesun/unity-urn-ruby.git'
+gem 'unity-logger', git: 'git@github.com:pocketsizesun/unity-logger-ruby.git'
+gem 'activemodel', '~> 6'
+gem 'activesupport', '~> 6'
+gem 'nokogiri', '~> 1.10'
+
+group :development do
+  gem 'pry'
+  gem 'rubocop'
+  gem 'listen'
+  gem 'rerun'
+end
+
+group :test do
+  gem 'rspec'
+end

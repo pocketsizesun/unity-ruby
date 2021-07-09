@@ -1,0 +1,19 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: DG-Service-<%= @app_module_name %>
+      ResourceQuery:
+        Type: TAG_FILTERS_1_0
+        Query:
+          TagFilters:
+          -
+            Key: 'AppName'
+            Values:
+            - 'dg-service-<%= @app_standard_name %>'
+      Tags:
+        -
+          Key: ProjectName
+          Value: dg

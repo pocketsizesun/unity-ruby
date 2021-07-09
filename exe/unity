@@ -8,6 +8,9 @@ orig_args = ARGV.dup
 command = ARGV.shift
 
 case command
+when 'new'
+  require 'unity/cli/new_command'
+  Unity::Cli::NewCommand.call(ARGV.dup)
 when 'console', 'c'
   ENV['UNITY_CONSOLE'] = '1'
   require_relative "#{Dir.pwd}/config/boot.rb"
