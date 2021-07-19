@@ -17,7 +17,7 @@ module Unity
 
       def silent(&block)
         checkout(&block)
-      rescue Redis::Error => e
+      rescue Redis::BaseError => e
         Unity.logger&.error(
           'message' => "redis error: #{e.message}",
           'exception_klass' => e.class.to_s,
