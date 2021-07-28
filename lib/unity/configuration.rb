@@ -13,7 +13,8 @@ module Unity
         auth_endpoint: nil,
         log_level: Logger::INFO,
         event_emitter_enabled: true,
-        middlewares: []
+        middlewares: [],
+        redlock: {}
       }
     end
 

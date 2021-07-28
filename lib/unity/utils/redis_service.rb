@@ -15,6 +15,12 @@ module Unity
         end
       end
 
+      def transaction(&_block)
+        checkout do |conn|
+          conn.multi { yield(conn) }
+        end
+      end
+
       def silent(&block)
         checkout(&block)
       rescue Redis::BaseError => e

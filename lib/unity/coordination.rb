@@ -2,142 +2,42 @@
 
 module Unity
   class Coordination
-    attr_accessor :table_name
-
     DEFAULT_TTL = 86_400
     DEFAULT_LOCK_TTL = 60
-    LOCK_EXPR_ATTRIBUTE_NAMES = { '#ttl' => 'ttl' }.freeze
-    WRITE_EXPR_ATTRIBUTE_NAMES = { '#data' => 'data', '#ttl' => 'ttl' }.freeze
-    REFRESH_EXPR_ATTRIBUTE_NAMES = { '#ttl' => 'ttl' }.freeze
+    DEFAULT_DATA_TTL = 3600
 
-    RELEASE_UPDATE_EXPR = <<~EXPR
-      REMOVE l_until, l_owner
-    EXPR
+    Error = Class.new(StandardError)
 
-    Error = Class.new(StandardError) do
-      attr_reader :lock
+    LockError = Class.new(Error) do
+      attr_reader :lock_name
 
-      def initialize(name)
-        @name = name
+      def initialize(lock_name)
+        @lock_name = lock_name
+        super("unable to get lock for: #{lock_name}")
       end
     end
-    LockError = Class.new(Error)
-    RefreshError = Class.new(Error)
-    WriteError = Class.new(Error)
 
-    Row = Struct.new(:name, :data, :ttl)
+    WriteError = Class.new(Error) do
+      attr_reader :lock_name
 
-    def self.table_name
-      @table_name ||= Unity.application.config.coordination_table
+      def initialize(lock_name)
+        @lock_name = lock_name
+        super("write lock for '#{lock_name}' is not valid")
+      end
     end
 
-    def self.table_name=(arg)
-      @table_name = arg.to_s
+    def initialize(namespace: nil, redlock: nil)
+      @redlock = redlock || Unity::Utils::RedisService.instance.redlock
+      @namespace = namespace || Unity.application.config.redlock[:namespace] || Unity.application.name
     end
 
-    def initialize(owner = nil, table_name: nil)
-      @owner = owner || "#{Socket.gethostname}-#{Process.pid}"
-      @table_name = table_name || self.class.table_name
-      @mutex = Mutex.new
-    end
+    def with_lock!(name, ttl: DEFAULT_LOCK_TTL)
+      lock_key_name = lock_key_for(name)
 
-    def lock(name, **kwargs)
-      now = current_time
-      row = Row.new(name, nil, nil)
-      result = Unity::Utils::DynamoService.instance.update_item(
-        table_name: @table_name,
-        key: { 'n' => row.name },
-        condition_expression: '(attribute_not_exists(l_until) OR l_until < :now) OR (l_owner = :l_owner)',
-        expression_attribute_names: LOCK_EXPR_ATTRIBUTE_NAMES,
-        expression_attribute_values: {
-          ':l_until' => now + (kwargs[:ttl] || DEFAULT_LOCK_TTL),
-          ':l_owner' => @owner,
-          ':now' => current_time
-        },
-        update_expression: 'SET l_owner = :l_owner, l_until = :l_until, #ttl = if_not_exists(#ttl, :l_until)',
-        return_values: 'ALL_NEW'
-      )
-      row.data = result.attributes['data']
-      row.ttl = Time.at(result.attributes['ttl'].to_i)
-      row
-    rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
-      nil
-    end
+      @redlock.lock(lock_key_name, ttl * 1000) do |lock_info|
+        raise LockError, lock_key_name unless lock_info
 
-    def write(name, data, **kwargs)
-      now = current_time
-      Unity::Utils::DynamoService.instance.update_item(
-        table_name: @table_name,
-        key: { 'n' => name },
-        update_expression: 'SET #data = :data, #ttl = :ttl',
-        condition_expression: 'attribute_exists(l_until) AND l_until > :now AND l_owner = :l_owner',
-        expression_attribute_names: WRITE_EXPR_ATTRIBUTE_NAMES,
-        expression_attribute_values: {
-          ':l_owner' => @owner,
-          ':now' => now,
-          ':ttl' => now + (kwargs[:ttl] || DEFAULT_TTL),
-          ':data' => data
-        }
-      )
-    rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
-      raise WriteError, name
-    end
-
-    def lock!(name, **kwargs)
-      row = lock(name, **kwargs)
-      return row unless row.nil?
-
-      raise LockError, name
-    end
-
-    def release(name)
-      now = current_time
-      Unity::Utils::DynamoService.instance.update_item(
-        table_name: @table_name,
-        key: { 'n' => name },
-        update_expression: RELEASE_UPDATE_EXPR,
-        condition_expression: 'attribute_exists(l_until) AND l_until >= :now AND l_owner = :l_owner',
-        expression_attribute_values: { ':l_owner' => @owner, ':now' => now }
-      )
-      true
-    rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
-      false
-    end
-
-    def refresh!(name, extend_time = 10)
-      now = current_time
-      Unity::Utils::DynamoService.instance.update_item(
-        table_name: @table_name,
-        key: { 'n' => name },
-        update_expression: 'SET l_until = :l_until',
-        condition_expression: 'attribute_exists(l_until) AND l_until > :now AND l_owner = :l_owner',
-        expression_attribute_names: LOCK_EXPR_ATTRIBUTE_NAMES,
-        expression_attribute_values: {
-          ':l_until' => now + extend_time,
-          ':l_owner' => @owner,
-          ':now' => now
-        }
-      )
-      true
-    rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
-      raise RefreshError, name
-    end
-
-    def with_lock(name, ttl: DEFAULT_LOCK_TTL, max_retries: 3, retry_interval: 1)
-      @mutex.synchronize do
-        retry_count = 0
-        begin
-          row = lock!(name, ttl: ttl)
-          yield(row)
-          release(name)
-        rescue LockError => e
-          if retry_count < max_retries
-            retry_count += 1
-            sleep retry_interval
-            retry
-          end
-          raise e
-        end
+        return yield(LockData.new(@redlock, lock_info, lock_key_name))
       end
     end
 
@@ -145,6 +45,95 @@ module Unity
 
     def current_time
       Process.clock_gettime(Process::CLOCK_REALTIME, :second)
+    end
+
+    def lock_key_for(str)
+      "#{@namespace}:coordination:#{str}"
+    end
+
+    class LockData
+      DEFAULT_TTL = 3600
+
+      def initialize(redlock, lock_info, lock_name)
+        @redlock = redlock
+        @lock_info = lock_info
+        @lock_name = lock_name
+        @lock_data_key = "#{lock_name}:data"
+      end
+
+      def info
+        @lock_info
+      end
+
+      def valid?
+        @redlock.valid_lock?(@lock_info)
+      end
+
+      def valid!
+        return true if valid?
+
+        raise ::Unity::Coordination::WriteError.new(@lock_name)
+      end
+
+      def keys
+        Unity::Utils::RedisService.instance.hkeys(@lock_data_key)
+      end
+
+      def to_h
+        Unity::Utils::RedisService.instance.hgetall(@lock_data_key)
+      end
+
+      def key?(key)
+        Unity::Utils::RedisService.instance.hexists(@lock_data_key, key.to_s)
+      end
+
+      def [](key)
+        Unity::Utils::RedisService.instance.hget(@lock_data_key, key.to_s)
+      end
+
+      def []=(key, value)
+        if !value.nil?
+          write(key, value)
+        else
+          delete(key)
+        end
+      end
+
+      def set(key, value, ttl: DEFAULT_TTL, nx: false)
+        valid! # check lock validity
+
+        Unity::Utils::RedisService.instance.transaction do |redis|
+          if nx == true
+            redis.hsetnx(@lock_data_key, key.to_s, value.to_s)
+          else
+            redis.hset(@lock_data_key, key.to_s, value.to_s)
+          end
+          redis.expire(@lock_data_key, ttl)
+        end
+      end
+
+      def delete(key)
+        valid! # check lock validity
+
+        Unity::Utils::RedisService.instance.hdel(@lock_data_key, key.to_s)
+      end
+
+      def ttl
+        Unity::Utils::RedisService.instance.ttl(@lock_data_key)
+      end
+
+      def incr(key, number = 1)
+        valid! # check lock validity
+
+        Unity::Utils::RedisService.instance.transaction do |redis|
+          redis.hincrby(@lock_data_key, key.to_s, number)
+          redis.expire(@lock_data_key, ttl)
+        end
+      end
+
+      def touch!(ttl: DEFAULT_DATA_TTL)
+        Unity::Utils::RedisService.instance.expire(@lock_data_key, ttl)
+      end
     end
   end
 end
