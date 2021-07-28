@@ -26,6 +26,13 @@ module Unity
         nil
       end
 
+      def redlock
+        @redlock ||= Redlock::Client.new(
+          [Redis.new],
+          Unity.application.config.redlock || {}
+        )
+      end
+
       def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, **kwargs, &block)

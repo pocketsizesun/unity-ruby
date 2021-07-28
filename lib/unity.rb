@@ -136,6 +136,7 @@ module Unity
     Dir.glob("#{gem_path}/lib/tasks/{*,*/**}.rake").each do |filename|
       load filename
     end
+    application&.load_tasks
   end
 
   def self.concurrency=(arg)
