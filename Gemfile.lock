@@ -13,7 +13,7 @@ GIT
 PATH
   remote: .
   specs:
-    unity (1.9.0)
+    unity (1.9.1)
       activemodel (~> 6.0)
       aws-sdk-sns (~> 1.36)
       aws-sdk-sqs (~> 1.34)
