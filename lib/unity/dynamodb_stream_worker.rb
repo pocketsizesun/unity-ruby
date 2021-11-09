@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'aws-sdk-dynamodbstreams'
-require 'aws-sdk-dynamodbstreams-event-parser'
+require 'unity-dynamodbstreams-event-parser'
 
 module Unity
   class DynamoDBStreamWorker
@@ -20,7 +20,7 @@ module Unity
     end
 
     def self.event_parser
-      @event_parser ||= Aws::DynamoDBStreams::EventParser.new
+      @event_parser ||= Unity::DynamoDBStreams::EventParser.new
     end
 
     def self.queue(arg)
@@ -40,7 +40,7 @@ module Unity
         'message' => "process dynamodb stream record '#{self.class}'",
         'body' => body
       )
-      event = self.class.event_parser.parse(body)
+      event = self.class.event_parser.call(JSON.parse(body))
       process_event(event)
     rescue Exception => e
       Unity.logger&.fatal(

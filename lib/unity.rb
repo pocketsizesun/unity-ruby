@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'socket'
 require 'logger'
 require 'securerandom'
@@ -9,7 +11,6 @@ require 'erb'
 require 'yaml'
 
 # 3rd party libs
-require 'symbol-fstring'
 require 'dotenv/load'
 require 'http'
 require 'connection_pool'
@@ -24,6 +25,7 @@ require 'unity/error'
 require 'unity/errors/event_handler_not_found'
 require 'unity/urn'
 require 'unity/time_id'
+require 'unity/time_uuid'
 require 'unity/logger'
 require 'unity/model'
 require 'unity/model_attributes/tagset_model_attribute'
@@ -86,7 +88,7 @@ module Unity
   end
 
   def self.env
-    @env ||= ENV.fetch('UNITY_ENV', 'development')
+    @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
   end
 
   def self.environment
