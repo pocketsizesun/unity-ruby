@@ -18,14 +18,14 @@ module Unity
           [operation.call(env['unity.operation_input']).to_json]
         ]
       rescue Unity::Operation::OperationError => e
-        Unity.logger&.error(
+        Unity.logger&.warn(
           'message' => e.message,
           'data' => e.data,
           'operation_input' => env['unity.operation_input']
         )
         [400, { 'content-type' => 'application/json' }, [Oj.dump(e.as_json, mode: :compat)]]
       rescue => e
-        exception_id = Unity::TimeId.random
+        exception_id = SecureRandom.uuid
 
         Unity.logger&.fatal(
           'message' => "service exception: #{e.class}",
