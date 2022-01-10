@@ -7,7 +7,7 @@ module Unity
         autoload_paths: %w[lib],
         auth_namespace: nil,
         time_zone: 'UTC',
-        concurrency: ENV.fetch('UNITY_CONCURRENCY', 4).to_i,
+        concurrency: ENV.fetch('CONCURRENCY', 4).to_i,
         auth_connection_timeout: 5,
         auth_enabled: true,
         auth_endpoint: nil,
