@@ -54,7 +54,6 @@ module Unity
 
       def query(params)
         @connection_pool.with do |conn|
-          Unity.logger&.debug "[DynamoService] execute query: #{params.inspect}"
           conn.query(params)
         end
       end

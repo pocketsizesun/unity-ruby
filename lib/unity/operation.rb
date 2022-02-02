@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'operation/input_parameters'
+
 module Unity
   class Operation
     attr_reader :context, :args
@@ -34,6 +36,16 @@ module Unity
       def to_json(*args)
         Oj.dump(@data, mode: :compat)
       end
+    end
+
+    def self.input_parameters(&block)
+      return @input_parameters unless block_given?
+
+      @input_parameters = Class.new(InputParameters, &block)
+    end
+
+    def self.with_input_parameters(attributes)
+      @input_parameters.new(attributes.compact)
     end
 
     def self.call(args, context = nil)

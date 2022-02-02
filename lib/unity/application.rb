@@ -6,7 +6,7 @@ module Unity
     attr_accessor :logger
 
     def self.inherited(base)
-      Unity.app_class = base
+      Unity.app_class ||= base
     end
 
     def self.instance
@@ -24,7 +24,6 @@ module Unity
       @policies = {}
       @event_handlers = {}
       @initialized_at = Time.now.to_i
-      @authentication_client_pool = nil
       @config = Unity::Configuration.new
       @rack_app = nil
       @file_configurations = {}
@@ -76,8 +75,11 @@ module Unity
       @policies[name] = klass_name || "#{name}OperationPolicy".to_sym
     end
 
-    def event_handler(name, klass)
-      @event_handlers[name.to_s] = "#{klass}EventHandler".to_sym
+    def event_handler(name, klass = nil, &block)
+      @event_handlers[name.to_s] ||= []
+      @event_handlers[name.to_s].push(
+        !block.nil? ? block : "#{klass}EventHandler".to_sym
+      )
     end
 
     def load!
@@ -97,16 +99,6 @@ module Unity
         logger&.info "load environment config from #{env_config_file}"
       end
 
-      # init auth client pool
-      if config.auth_enabled == true
-        @authentication_client_pool = ConnectionPool.new(
-          size: config.concurrency.to_i,
-          timeout: config.auth_connection_timeout.to_i
-        ) do
-          Unity::Authentication::Client.new(config.auth_endpoint)
-        end
-      end
-
       config.autoload_paths.each do |path|
         Dir.glob("#{path}/**/*.rb").each do |file|
           require_relative "#{Dir.pwd}/#{file}"
@@ -124,8 +116,14 @@ module Unity
         @policy_handlers[k] = @module.const_get(:OperationPolicies).const_get(v)
       end
 
-      event_handlers.each do |k, v|
-        @event_handler_instances[k] = @module.const_get(:EventHandlers).const_get(v)
+      event_handlers.each do |name, handlers|
+        @event_handler_instances[name] = handlers.map do |v|
+          if v.is_a?(Proc)
+            v.call
+          else
+            @module.const_get(:EventHandlers).const_get(v)
+          end
+        end
       end
 
       # event worker
@@ -160,14 +158,10 @@ module Unity
       @policy_handlers[name.to_s]
     end
 
-    def find_event_handler(name)
+    def find_event_handlers(name)
       return nil unless @event_handler_instances.key?(name)
 
       @event_handler_instances[name]
-    end
-
-    def call_event_handler(name, input)
-      find_event_handler(name).call(input)
     end
 
     def call(env)
@@ -200,10 +194,6 @@ module Unity
 
         __self__.config.middlewares.each do |middleware|
           use middleware, app: __self__
-        end
-
-        if __self__.config.auth_enabled == true
-          use Unity::Middlewares::AuthenticationMiddleware
         end
 
         run Unity::Middlewares::OperationExecutorMiddleware.new

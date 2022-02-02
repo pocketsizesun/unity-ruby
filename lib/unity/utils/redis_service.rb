@@ -39,6 +39,18 @@ module Unity
         )
       end
 
+      def get(key)
+        @connection_pool.with do |redis|
+          redis.get(key)
+        end
+      end
+
+      def set(key, value, **kwargs)
+        @connection_pool.with do |redis|
+          redis.set(key, value, **kwargs)
+        end
+      end
+
       def method_missing(method_name, *args, **kwargs, &block)
         @connection_pool.with do |conn|
           conn.__send__(method_name, *args, **kwargs, &block)

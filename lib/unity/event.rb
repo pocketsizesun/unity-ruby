@@ -39,6 +39,10 @@ module Unity
       @id = arg
     end
 
+    def [](key)
+      data[key]
+    end
+
     def deduplication_id
       Base64.urlsafe_encode64(
         Digest::SHA256.digest(Oj.dump([name, data], mode: :compat))

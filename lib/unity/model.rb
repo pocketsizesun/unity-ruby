@@ -22,12 +22,24 @@ module Unity
       end
     end
 
+    def self.with_attributes_from_database(hash)
+      record = new
+      record.assign_attributes_from_database(hash)
+      record
+    end
+
     def self.build!(*args)
       new(*args).tap(&:valid!)
     end
 
     def self.build(*args)
       new(*args)
+    end
+
+    def assign_attributes_from_database(hash)
+      hash.each do |attr_name, attr_value|
+        @attributes.write_from_database(attr_name.name, attr_value)
+      end
     end
 
     def valid!

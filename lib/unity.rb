@@ -30,7 +30,6 @@ require 'unity/logger'
 require 'unity/model'
 require 'unity/model_attributes/tagset_model_attribute'
 require 'unity/application'
-require 'unity/authentication'
 require 'unity/coordination'
 require 'unity/event'
 require 'unity/event_emitter'
@@ -38,7 +37,6 @@ require 'unity/event_handler'
 require 'unity/event_store'
 require 'unity/event_worker'
 require 'unity/middleware'
-require 'unity/middlewares/authentication_middleware'
 require 'unity/middlewares/health_check_middleware'
 require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/request_parser_middleware'
@@ -147,5 +145,17 @@ module Unity
 
   def self.concurrency
     application.config.concurrency
+  end
+
+  def self.cache
+    @cache ||= Unity::Utils::RedisService.instance
+  end
+
+  def self.dynamodb
+    @dynamodb ||= Unity::Utils::DynamoService.instance
+  end
+
+  def self.s3
+    @s3 ||= Unity::Utils::S3Service.instance
   end
 end
