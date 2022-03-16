@@ -19,6 +19,9 @@ require 'rack'
 require 'rack/builder'
 require 'shoryuken'
 require 'active_model'
+require 'zeitwerk'
+
+# gem files
 require 'unity/version'
 require 'unity/configuration'
 require 'unity/error'
@@ -42,8 +45,8 @@ require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/request_parser_middleware'
 require 'unity/operation'
 require 'unity/operation_context'
-require 'unity/operation_policy'
 require 'unity/record_handler'
+require 'unity/batch_worker'
 require 'unity/worker'
 
 # utils
@@ -61,62 +64,64 @@ Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
 
 module Unity
-  def self.app_class=(klass)
-    @app_class = klass
+  extend self
+
+  def applications
+    @applications ||= []
   end
 
-  def self.app_class
-    @app_class
+  def application
+    @application
   end
 
-  def self.application
-    @application ||= app_class&.instance
+  def application=(app)
+    @application ||= app
   end
 
-  def self.logger
+  def logger
     application.logger
   end
 
-  def self.logger=(arg)
+  def logger=(arg)
     application.logger = arg
   end
 
-  def self.env=(arg)
+  def env=(arg)
     @env = arg.to_s
   end
 
-  def self.env
+  def env
     @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
   end
 
-  def self.environment
+  def environment
     env
   end
 
-  def self.environment=(arg)
+  def environment=(arg)
     self.env = arg
   end
 
-  def self.root
+  def root
     @root ||= Dir.pwd
   end
 
-  def self.event_emitter
+  def event_emitter
     return @event_emitter unless @event_emitter.nil?
     return nil unless Unity.application.config.event_emitter_enabled == true
 
     @event_emitter = Unity::EventEmitter.new(Unity.application.name)
   end
 
-  def self.event_store
+  def event_store
     @event_store ||= Unity::EventStore.new
   end
 
-  def self.coordination
+  def coordination
     @coordination ||= Unity::Coordination.new
   end
 
-  def self.report_exception(name = nil, &_block)
+  def report_exception(name = nil, &_block)
     yield
   rescue Exception => e
     Unity.logger&.fatal(
@@ -128,34 +133,34 @@ module Unity
     raise e
   end
 
-  def self.gem_path
+  def gem_path
     @gem_path ||= File.realpath(File.dirname(__FILE__) + '/../')
   end
 
-  def self.load_tasks
+  def load_tasks
     Dir.glob("#{gem_path}/lib/tasks/{*,*/**}.rake").each do |filename|
       load filename
     end
     application&.load_tasks
   end
 
-  def self.concurrency=(arg)
+  def concurrency=(arg)
     application.config.concurrency = arg.to_i
   end
 
-  def self.concurrency
+  def concurrency
     application.config.concurrency
   end
 
-  def self.cache
+  def cache
     @cache ||= Unity::Utils::RedisService.instance
   end
 
-  def self.dynamodb
+  def dynamodb
     @dynamodb ||= Unity::Utils::DynamoService.instance
   end
 
-  def self.s3
+  def s3
     @s3 ||= Unity::Utils::S3Service.instance
   end
 end

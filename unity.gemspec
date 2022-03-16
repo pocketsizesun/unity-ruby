@@ -42,6 +42,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'unity-logger'
   spec.add_dependency 'shoryuken', '~> 5.2'
   spec.add_dependency 'oj', '~> 3.11'
+  spec.add_dependency 'zeitwerk', '~> 2.5'
+  spec.add_dependency 'nokogiri', '~> 1.13'
 
   spec.add_development_dependency 'rubocop'
 end

@@ -5,18 +5,20 @@ module Unity
     class OperationExecutorMiddleware
       OPERATION_NOT_FOUND_RESPONSE = '{"error":"Operation not found","data":{}}'
 
+      def initialize(app)
+        @app = app
+      end
+
       def call(env)
         operation_name = env['unity.operation_name']
-        operation_handler = Unity.application.find_operation(operation_name)
+        operation_handler = @app.find_operation(operation_name)
         return operation_not_found if operation_handler.nil?
 
-        operation = operation_handler.new(env['unity.operation_context'])
+        result = operation_handler.call(
+          env['unity.operation_input'], env['unity.operation_context']
+        )
 
-        [
-          200,
-          { 'content-type' => 'application/json' },
-          [operation.call(env['unity.operation_input']).to_json]
-        ]
+        [200, { 'content-type' => 'application/json' }, [result.to_json]]
       rescue Unity::Operation::OperationError => e
         Unity.logger&.warn(
           'message' => e.message,

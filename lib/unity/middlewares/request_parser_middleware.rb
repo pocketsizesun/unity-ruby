@@ -3,8 +3,9 @@
 module Unity
   module Middlewares
     class RequestParserMiddleware
-      def initialize(app)
+      def initialize(app, options)
         @app = app
+        @unity_app = options.fetch(:unity_app)
       end
 
       # @param [Hash] env
@@ -12,7 +13,7 @@ module Unity
         env['rack.request'] = Rack::Request.new(env)
         env['unity.operation_name'] = env['rack.request'].params.fetch('Operation', nil)
         env['unity.operation_context'] = Unity::OperationContext.new
-        env['unity.operation_input'] = parse_request_body(env['rack.request'])
+        env['unity.operation_input'] = @unity_app.request_body_parser(env['rack.request'])
         @app.call(env)
       rescue JSON::ParserError => e
         [
@@ -22,14 +23,6 @@ module Unity
             { 'error' => "JSON parser error: #{e.message}" }.to_json
           ]
         ]
-      end
-
-      private
-
-      # @param [Rack::Request] request
-      # @return [Hash]
-      def parse_request_body(request)
-        Oj.load(request.body) || {}
       end
     end
   end
