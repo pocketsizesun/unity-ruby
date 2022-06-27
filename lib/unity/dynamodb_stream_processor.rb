@@ -4,27 +4,19 @@ require 'aws-sdk-dynamodbstreams'
 require 'unity-dynamodbstreams-event-parser'
 
 module Unity
-  class DynamoDBStreamWorker
-    include Shoryuken::Worker
-
-    shoryuken_options auto_delete: true
-
+  class DynamoDBStreamProcessor
     HOOK_TYPES = {
       'INSERT' => :insert,
       'REMOVE' => :remove,
       'MODIFY' => :update
     }.freeze
 
+    def initialize
+      @event_parser = Unity::DynamoDBStreams::EventParser.new
+    end
+
     def self.configure(&block)
       instance_exec(&block)
-    end
-
-    def self.event_parser
-      @event_parser ||= Unity::DynamoDBStreams::EventParser.new
-    end
-
-    def self.queue(arg)
-      shoryuken_options(queue: arg.to_s)
     end
 
     def self.table_handlers
@@ -35,12 +27,12 @@ module Unity
       table_handlers[name] = TableHandler.new(&block)
     end
 
-    def perform(_sqs_msg, body)
+    def process(body)
       Unity.logger&.debug(
         'message' => "process dynamodb stream record '#{self.class}'",
         'body' => body
       )
-      event = self.class.event_parser.call(JSON.parse(body))
+      event = @event_parser.call(JSON.parse(body))
       process_event(event)
     rescue Exception => e
       Unity.logger&.fatal(

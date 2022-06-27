@@ -17,7 +17,6 @@ require 'connection_pool'
 require 'aws-sdk-sns'
 require 'rack'
 require 'rack/builder'
-require 'shoryuken'
 require 'active_model'
 require 'unity/version'
 require 'unity/configuration'
@@ -34,8 +33,6 @@ require 'unity/coordination'
 require 'unity/event'
 require 'unity/event_emitter'
 require 'unity/event_handler'
-require 'unity/event_store'
-require 'unity/event_worker'
 require 'unity/middleware'
 require 'unity/middlewares/health_check_middleware'
 require 'unity/middlewares/operation_executor_middleware'
@@ -44,16 +41,11 @@ require 'unity/operation'
 require 'unity/operation_context'
 require 'unity/operation_policy'
 require 'unity/record_handler'
-require 'unity/worker'
 
 # utils
 require 'unity/utils/callable'
-require 'unity/utils/dynamo_service'
 require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/dynamo_date_range_with_time_id_query'
-require 'unity/utils/elastic_search_service'
-require 'unity/utils/redis_service'
-require 'unity/utils/s3_service'
 require 'unity/utils/tagset'
 require 'unity/utils/time_parser'
 
@@ -101,30 +93,18 @@ module Unity
     @root ||= Dir.pwd
   end
 
-  def self.event_emitter
-    return @event_emitter unless @event_emitter.nil?
-    return nil unless Unity.application.config.event_emitter_enabled == true
-
-    @event_emitter = Unity::EventEmitter.new(Unity.application.name)
-  end
-
-  def self.event_store
-    @event_store ||= Unity::EventStore.new
-  end
-
   def self.coordination
     @coordination ||= Unity::Coordination.new
   end
 
-  def self.report_exception(name = nil, &_block)
+  def self.report_exception(tag = '@', &_block)
     yield
-  rescue Exception => e
+  rescue Exception => e # rubocop:disable Lint/RescueException
     Unity.logger&.fatal(
-      'error' => e.message,
-      'report_exception_name' => name,
-      'exception_klass' => e.class.to_s,
-      'exception_backtrace' => e.backtrace
+      'message' => "[#{tag}] uncaught exception: #{e.message} (#{e.class})",
+      'backtrace' => e.backtrace
     )
+
     raise e
   end
 
@@ -137,25 +117,5 @@ module Unity
       load filename
     end
     application&.load_tasks
-  end
-
-  def self.concurrency=(arg)
-    application.config.concurrency = arg.to_i
-  end
-
-  def self.concurrency
-    application.config.concurrency
-  end
-
-  def self.cache
-    @cache ||= Unity::Utils::RedisService.instance
-  end
-
-  def self.dynamodb
-    @dynamodb ||= Unity::Utils::DynamoService.instance
-  end
-
-  def self.s3
-    @s3 ||= Unity::Utils::S3Service.instance
   end
 end

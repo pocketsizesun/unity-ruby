@@ -4,17 +4,11 @@ module Unity
   class Configuration
     def self.default_options
       {
-        autoload_paths: %w[lib],
-        auth_namespace: nil,
         time_zone: 'UTC',
         concurrency: ENV.fetch('CONCURRENCY', 4).to_i,
-        auth_connection_timeout: 5,
-        auth_enabled: true,
-        auth_endpoint: nil,
         log_level: Logger::INFO,
         event_emitter_enabled: true,
-        middlewares: [],
-        redlock: {}
+        middlewares: []
       }
     end
 

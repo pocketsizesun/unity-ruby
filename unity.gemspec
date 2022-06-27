@@ -40,7 +40,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'pry', '~> 0.14'
   spec.add_dependency 'unity-urn'
   spec.add_dependency 'unity-logger'
-  spec.add_dependency 'shoryuken', '~> 5.2'
   spec.add_dependency 'oj', '~> 3.11'
 
   spec.add_development_dependency 'rubocop'

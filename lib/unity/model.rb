@@ -22,10 +22,20 @@ module Unity
       end
     end
 
-    def self.with_attributes_from_database(hash)
-      record = new
-      record.assign_attributes_from_database(hash)
-      record
+    def self.attribute_builder
+      @attribute_builder ||= ActiveModel::AttributeSet::Builder.new(
+        attribute_types
+      )
+    end
+
+    def self.init_with_attributes(attributes)
+      allocate.initialize_with(attributes, false)
+    end
+
+    def initialize_with(attributes, new_record = false)
+      @attributes = self.class.attribute_builder.build_from_database(attributes)
+      @new_record = new_record
+      self
     end
 
     def self.build!(*args)

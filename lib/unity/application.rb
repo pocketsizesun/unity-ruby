@@ -2,31 +2,72 @@
 
 module Unity
   class Application
-    attr_reader   :config, :initialized_at, :operations, :policies, :event_handlers
+    attr_reader   :booted_at, :operations
     attr_accessor :logger
 
     def self.inherited(base)
       Unity.app_class ||= base
     end
 
+    def self.config
+      @config ||= Unity::Configuration.new
+    end
+
     def self.instance
       @instance ||= new
     end
 
-    def self.method_missing(method_name, *args, &block)
-      instance.__send__(method_name, *args, &block)
+    def self.load!
+      instance.load!
+    end
+
+    def self.configure(&block)
+      instance.configure(&block)
+    end
+
+    def self.operation(name, klass_name = nil, &block)
+      instance.operation(name, klass_name, &block)
+    end
+
+    def self.find_operation(name)
+      instance.find_operation(name)
+    end
+
+    def self.load_tasks
+      instance.load_tasks
+    end
+
+    def self.name
+      instance.name
+    end
+
+    def self.name=(arg)
+      instance.name = arg
     end
 
     def initialize
-      @module = Kernel.const_get(self.class.to_s.split('::').first.to_sym)
+      @module = find_module
       @logger = Unity::Logger.new(STDOUT)
       @operations = {}
-      @policies = {}
-      @event_handlers = {}
-      @initialized_at = Time.now.to_i
-      @config = Unity::Configuration.new
+      @booted_at = Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
       @rack_app = nil
       @file_configurations = {}
+    end
+
+    def find_module
+      klass_split = self.class.to_s.split('::')
+      klass_split.pop
+      klass_split.reduce(Kernel) do |mod_klass, item|
+        mod_klass.const_get(item.to_sym)
+      end
+    end
+
+    def config
+      self.class.config
+    end
+
+    def uptime
+      Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i - @booted_at
     end
 
     def config_for(name)
@@ -57,6 +98,17 @@ module Unity
       instance_exec(&block)
     end
 
+    def silent(tag = '@', on: [StandardError], &_block)
+      yield
+    rescue *on => e
+      Unity.logger&.error(
+        'message' => "[#{tag}] silent exception: #{e.message} (#{e.class})",
+        'backtrace' => e.backtrace
+      )
+
+      nil
+    end
+
     def name=(arg)
       @name = arg.to_s
     end
@@ -65,27 +117,15 @@ module Unity
       @name ||= @module.to_s.downcase
     end
 
-    def operation(name, klass_name = nil)
+    def operation(name, klass_name = nil, &block)
       name = name.to_s
-      @operations[name] = klass_name || "#{name}Operation".to_sym
-    end
-
-    def policy(name, klass_name = nil)
-      name = name.to_s
-      @policies[name] = klass_name || "#{name}OperationPolicy".to_sym
-    end
-
-    def event_handler(name, klass = nil, &block)
-      @event_handlers[name.to_s] ||= []
-      @event_handlers[name.to_s].push(
-        !block.nil? ? block : "#{klass}EventHandler".to_sym
-      )
+      @operations[name] = klass_name || block || @module.const_get(:Operations).const_get("#{name}Operation".to_sym)
+    rescue NameError
+      raise StandardError, "Operation klass '#{@module.name}::Operations::#{name}Operation' not found"
     end
 
     def load!
       @operation_handlers = {}
-      @policy_handlers = {}
-      @event_handler_instances = {}
 
       # init time zone
       ENV['TZ'] = config.time_zone
@@ -94,42 +134,11 @@ module Unity
       env_config_file = Unity.root + "/config/environments/#{Unity.env}.rb"
       if File.exist?(env_config_file)
         load env_config_file
-        @logger = config.logger unless config.logger.nil?
-        @logger&.level = config.log_level
-        logger&.info "load environment config from #{env_config_file}"
       end
 
-      config.autoload_paths.each do |path|
-        Dir.glob("#{path}/**/*.rb").each do |file|
-          require_relative "#{Dir.pwd}/#{file}"
-          logger&.debug "load file: #{Dir.pwd}/#{file}"
-        end
-      end
-
-      operations.each do |k, v|
-        @operation_handlers[k] = @module.const_get(:Operations).const_get(v)
-      rescue NameError
-        raise "Operation class '#{v}' not found"
-      end
-
-      policies.each do |k, v|
-        @policy_handlers[k] = @module.const_get(:OperationPolicies).const_get(v)
-      end
-
-      event_handlers.each do |name, handlers|
-        @event_handler_instances[name] = handlers.map do |v|
-          if v.is_a?(Proc)
-            v.call
-          else
-            @module.const_get(:EventHandlers).const_get(v)
-          end
-        end
-      end
-
-      # event worker
-      unless config.event_worker_queue.nil?
-        Unity::EventWorker.queue = config.event_worker_queue
-      end
+      # configure logger
+      @logger = config.logger unless config.logger.nil?
+      @logger&.level = config.log_level
 
       # run initializers
       Dir.glob("#{Unity.root}/config/initializers/*.rb").each do |item|
@@ -138,30 +147,12 @@ module Unity
         require "#{Unity.root}/config/initializers/#{file}"
       end
 
-      # Configure Shoryuken defaults
-      # - change Shoryuken logger
-      # - cache visibility timeout by default
-      if defined?(Shoryuken)
-        Shoryuken::Logging.logger = logger || Logger.new('/dev/null')
-        Shoryuken.cache_visibility_timeout = true
-      end
-
       # build rack app
       @rack_app = build_rack_app
     end
 
     def find_operation(name)
-      @operation_handlers[name.to_s]
-    end
-
-    def find_policy(name)
-      @policy_handlers[name.to_s]
-    end
-
-    def find_event_handlers(name)
-      return nil unless @event_handler_instances.key?(name)
-
-      @event_handler_instances[name]
+      operations[name.to_s]
     end
 
     def call(env)
@@ -187,7 +178,7 @@ module Unity
 
       Rack::Builder.new do
         map '/_status' do
-          run Unity::Middlewares::HealthCheckMiddleware.new
+          run Unity::Middlewares::HealthCheckMiddleware.new(__self__)
         end
 
         use Unity::Middlewares::RequestParserMiddleware
@@ -196,7 +187,7 @@ module Unity
           use middleware, app: __self__
         end
 
-        run Unity::Middlewares::OperationExecutorMiddleware.new
+        run Unity::Middlewares::OperationExecutorMiddleware.new(__self__)
       end.to_app
     end
   end

@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 module Unity
-  class Event < Unity::Model
-    attribute :id, :string
-    attribute :name, :string
-    attribute :timestamp, :datetime, default: -> { Time.now }
-    attribute :data, default: -> { Hash.new }
-
+  class Event
     EventMalformatedError = Class.new(StandardError)
 
     def self.parse(str)
@@ -29,14 +24,11 @@ module Unity
       )
     end
 
-    def id
-      @id ||= Base64.urlsafe_encode64(
-        Digest::SHA256.digest(Oj.dump([timestamp, name, data], mode: :compat))
-      ).slice(0, 43)
-    end
-
-    def id=(arg)
-      @id = arg
+    def initialize(attributes)
+      @id = attributes[:id] || SecureRandom.uuid
+      @name = attributes.fetch(:name)
+      @timestamp = attributes[:timestamp] || Time.now
+      @data = attributes[:data] || {}
     end
 
     def [](key)
@@ -44,23 +36,26 @@ module Unity
     end
 
     def deduplication_id
-      Base64.urlsafe_encode64(
-        Digest::SHA256.digest(Oj.dump([name, data], mode: :compat))
-      ).slice(0, 43)
+      Digest::SHA256.hexdigest(
+        Oj.dump([name, timestamp.to_i, data], mode: :compat)
+      )
     end
 
     def content_sha256
       Digest::SHA256.hexdigest(Oj.dump(data, mode: :compat))
     end
 
-    def as_sns_notification
+    def as_json(*)
       {
         'id' => id,
         'name' => name,
-        'date' => timestamp.to_i * 1000,
         'timestamp' => timestamp.to_i,
         'data' => data
       }
+    end
+
+    def to_json(*)
+      as_json.to_json
     end
 
     def as_dynamo_item
