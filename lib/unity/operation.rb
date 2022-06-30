@@ -1,51 +1,17 @@
 # frozen_string_literal: true
 
-require_relative 'operation/input_parameters'
-
 module Unity
   class Operation
     attr_reader :context, :args
 
-    class Output
-      def initialize(data)
-        @data = data.transform_keys(&:to_s)
-      end
+    OperationContext = Class.new(Hash)
 
-      def method_missing(method_name, *args, &block)
-        return super unless @data.key?(method_name.name)
-
-        @data.fetch(method_name.name, nil)
-      end
-
-      def respond_to_missing(method_name, include_private = false)
-        @data.key?(method_name.name) || super
-      end
-
-      def [](key)
-        @data[key.to_s]
-      end
-
-      def []=(key, value)
-        @data[key.to_s] = value
-      end
-
-      def as_json
-        @data.as_json
-      end
-
-      def to_json(*args)
-        Oj.dump(@data, mode: :compat)
-      end
+    def self.input(klass = nil, &block)
+      @input_klass = klass || Class.new(Unity::Operation::Input, &block)
     end
 
-    def self.input_parameters(&block)
-      return @input_parameters unless block_given?
-
-      @input_parameters = Class.new(InputParameters, &block)
-    end
-
-    def self.with_input_parameters(attributes)
-      @input_parameters.new(attributes.compact)
+    def self.input_klass
+      @input_klass
     end
 
     def self.call(args, context = nil)
@@ -54,31 +20,57 @@ module Unity
 
     # @param [Hash] context - A key/value set of options
     def initialize(context = nil)
-      @context = context.is_a?(Hash) ? context : Unity::OperationContext.new
+      @context = \
+        if context.is_a?(Unity::OperationContext)
+          context
+        else
+          Unity::OperationContext.new
+        end
     end
 
     def call(args)
       raise "#call not implemented for #{self.class}"
     end
 
-    class Error < StandardError
-      attr_reader :code, :data
+    def input
+      self.class.input_klass
+    end
 
-      def initialize(code, message, data = {})
+    class Error < StandardError
+      attr_reader :code, :data, :trace_id
+
+      def initialize(message, data = {}, code = 400)
         super(message)
 
-        @code = code
+        @trace_id = SecureRandom.urlsafe_base64(18)
         @data = data
+        @code = code
       end
 
       def as_json
-        { 'error' => message, 'data' => data }
+        { 'error' => message, 'trace_id' => @trace_id, 'data' => data }
       end
     end
 
     class OperationError < Error
+    end
+
+    class ValidationError < Error
+    end
+
+    class ResourceNotFoundError < Error
       def initialize(message, data = {})
-        super(400, message, data)
+        super(message, data, 404)
+      end
+    end
+
+    class ServerError < Error
+      def initialize(message, data = {})
+        super('Internal Server Error', data, 500)
+
+        Unity.logger&.error(
+          { 'message' => message, '@trace_id' => trace_id }.merge!(data)
+        )
       end
     end
   end

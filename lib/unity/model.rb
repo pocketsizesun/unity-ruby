@@ -9,19 +9,6 @@ module Unity
     include ActiveModel::Serialization
     include ActiveModel::Serializers::JSON
 
-    ValidationError = Class.new(StandardError) do
-      attr_reader :model
-
-      def initialize(model)
-        super("#{model.class} validation error")
-        @model = model
-      end
-
-      def errors
-        @model.errors
-      end
-    end
-
     def self.attribute_builder
       @attribute_builder ||= ActiveModel::AttributeSet::Builder.new(
         attribute_types
@@ -50,12 +37,6 @@ module Unity
       hash.each do |attr_name, attr_value|
         @attributes.write_from_database(attr_name.name, attr_value)
       end
-    end
-
-    def valid!
-      return true if valid?
-
-      raise ValidationError, self
     end
   end
 end

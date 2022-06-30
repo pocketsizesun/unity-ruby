@@ -47,7 +47,7 @@ module Unity
 
     def initialize
       @module = find_module
-      @logger = Unity::Logger.new(STDOUT)
+      @logger = ::Logger.new(STDOUT)
       @operations = {}
       @booted_at = Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
       @rack_app = nil

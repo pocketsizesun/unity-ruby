@@ -21,7 +21,7 @@ module Unity
           { 'content-type' => 'application/json' },
           [operation.call(env['unity.operation_input']).to_json]
         ]
-      rescue Unity::Operation::OperationError => e
+      rescue Unity::Operation::Error => e
         operation_error(env, e)
       rescue Exception => e # rubocop:disable Lint/RescueException
         uncaught_exception(env, e)
@@ -29,52 +29,51 @@ module Unity
 
       private
 
+      def send_json(code, body)
+        [code, { 'content-type' => 'application/json' }, [body]]
+      end
+
       def operation_not_found
-        [
-          404,
-          { 'content-type' => 'application/json' },
-          [OPERATION_NOT_FOUND_RESPONSE]
-        ]
+        send_json(404, OPERATION_NOT_FOUND_RESPONSE)
       end
 
       def internal_server_error(data)
-        [
+        send_json(
           500,
-          { 'content-type' => 'application/json' },
-          [
+          JSON.dump(
             {
               'error' => 'INTERNAL_SERVER_ERROR',
               'data' => data
-            }.to_json
-          ]
-        ]
+            }
+          )
+        )
       end
 
       def operation_error(env, exception)
-        Unity.logger&.warn(
-          'message' => exception.message,
-          'data' => exception.data,
-          'operation_input' => env['unity.operation_input']
-        )
+        if env['rack.request']['X-Unity-Debug'] == '1'
+          Unity.logger&.info(
+            'message' => exception.message,
+            '@trace_id' => exception.trace_id,
+            'data' => exception.data,
+            'operation_name' => env['unity.operation_name'],
+            'operation_input' => env['unity.operation_input']
+          )
+        end
 
-        [
-          400,
-          { 'content-type' => 'application/json' },
-          [Oj.dump(exception.as_json, mode: :compat)]
-        ]
+        send_json(exception.code, Oj.dump(exception.as_json, mode: :compat))
       end
 
       def uncaught_exception(env, exception)
-        log_id = SecureRandom.uuid
+        trace_id = SecureRandom.urlsafe_base64(18)
 
         # log exception
         Unity.logger&.fatal(
-          'log_id' => log_id,
+          '@trace_id' => trace_id,
           'message' => "service exception: #{exception.message} (#{exception.class})",
-          'backtrace' => exception.backtrace,
           'operation_name' => env['unity.operation_name'],
           'operation_context' => env['unity.operation_context'].as_json,
-          'operation_input' => env['unity.operation_input']
+          'operation_input' => env['unity.operation_input'],
+          'backtrace' => exception.backtrace
         )
 
         if @app.config.report_exception == true
@@ -83,7 +82,7 @@ module Unity
             'data' => { 'backtrace' => exception.backtrace }
           )
         else
-          internal_server_error('log_id' => log_id)
+          internal_server_error('trace_id' => trace_id)
         end
       end
     end

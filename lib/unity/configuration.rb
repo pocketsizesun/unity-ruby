@@ -7,7 +7,6 @@ module Unity
         time_zone: 'UTC',
         concurrency: ENV.fetch('CONCURRENCY', 4).to_i,
         log_level: Logger::INFO,
-        event_emitter_enabled: true,
         middlewares: []
       }
     end

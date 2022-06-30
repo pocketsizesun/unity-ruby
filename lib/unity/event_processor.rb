@@ -42,16 +42,13 @@ module Unity
         event_handler.call(event)
       end
 
-      # delete SQS message
-      sqs_msg.delete
-
       true
-    rescue Exception => e
+    rescue Exception => e # rubocop:disable Lint/RescueException
       Unity.logger&.fatal(
         'error' => e.message,
+        'event' => event.as_json,
         'exception_klass' => e.class.to_s,
-        'exception_backtrace' => e.backtrace,
-        'event_body' => body
+        'exception_backtrace' => e.backtrace
       )
 
       raise e

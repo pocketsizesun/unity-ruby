@@ -33,14 +33,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'unity-dynamodb-attribute-deserializer', '~> 1.0'
   spec.add_dependency 'unity-dynamodbstreams-event-parser', '~> 1.0'
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
-  spec.add_dependency 'http', '~> 4.4'
+  spec.add_dependency 'http', '~> 5.1'
   spec.add_dependency 'connection_pool', '~> 2.2'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'dotenv', '~> 2.7'
   spec.add_dependency 'pry', '~> 0.14'
-  spec.add_dependency 'unity-urn'
-  spec.add_dependency 'unity-logger'
-  spec.add_dependency 'oj', '~> 3.11'
+  spec.add_dependency 'oj', '~> 3.13'
 
   spec.add_development_dependency 'rubocop'
 end
