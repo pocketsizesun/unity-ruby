@@ -5,9 +5,10 @@ module Unity
     attr_reader :context, :args
 
     OperationContext = Class.new(Hash)
+    Output = ::Unity::OperationOutput
 
     def self.input(klass = nil, &block)
-      @input_klass = klass || Class.new(Unity::Operation::Input, &block)
+      @input_klass = klass || Class.new(Unity::OperationInput, &block)
     end
 
     def self.input_klass
