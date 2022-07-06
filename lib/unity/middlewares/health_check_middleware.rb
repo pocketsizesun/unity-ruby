@@ -6,7 +6,6 @@ module Unity
       HEALTH_CHECK_RESPONSE = '{"uptime": %d, "service": "%s"}'
 
       def initialize(app)
-        @started_at = Time.now.to_i
         @app = app
       end
 
