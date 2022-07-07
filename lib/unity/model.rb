@@ -5,6 +5,7 @@ module Unity
     include ActiveModel::Model
     include ActiveModel::Attributes
     include ActiveModel::AttributeMethods
+    include ActiveModel::Dirty
     include ActiveModel::Validations
     include ActiveModel::Serialization
     include ActiveModel::Serializers::JSON
