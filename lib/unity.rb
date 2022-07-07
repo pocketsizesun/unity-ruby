@@ -117,4 +117,8 @@ module Unity
   def self.current_timestamp
     Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
   end
+
+  def self.current_time
+    Time.at(Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i)
+  end
 end
