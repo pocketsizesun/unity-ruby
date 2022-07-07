@@ -5,5 +5,5 @@ gemspec
 
 gem 'unity-urn', git: 'git@github.com:pocketsizesun/unity-urn-ruby.git'
 gem 'unity-logger', git: 'git@github.com:pocketsizesun/unity-logger-ruby.git'
-gem "rake", "~> 12.0"
+gem "rake", "~> 13.0"
 gem "rspec", "~> 3.0"
