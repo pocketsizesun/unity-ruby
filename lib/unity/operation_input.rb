@@ -16,8 +16,12 @@ module Unity
     end
 
     def self.load(hash)
+      # sanitize attributes
       attributes = hash.reject { |key, _| key[0] == '#' }
+      attributes.compact!
       attributes.transform_keys!(&:to_sym)
+
+      # create object
       obj = new(attributes)
 
       unless obj.valid?
