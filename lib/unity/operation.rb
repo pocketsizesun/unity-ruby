@@ -37,7 +37,7 @@ module Unity
       self.class.input_klass
     end
 
-    class Error < StandardError
+    class OperationError < Error
       attr_reader :code, :data, :trace_id
 
       def initialize(message, data = {}, code = 400)
@@ -53,25 +53,27 @@ module Unity
       end
     end
 
-    class OperationError < Error
+    class ValidationError < OperationError
     end
 
-    class ValidationError < Error
+    # HTTP Error Code: 403
+    class ForbiddenError < OperationError
+      def initialize(message, data = {})
+        super(message, data, 403)
+      end
     end
 
-    class ResourceNotFoundError < Error
+    # HTTP Error Code: 404
+    class ResourceNotFoundError < OperationError
       def initialize(message, data = {})
         super(message, data, 404)
       end
     end
 
-    class ServerError < Error
+    # HTTP Error Code: 409
+    class ConflictError < OperationError
       def initialize(message, data = {})
-        super('Internal Server Error', data, 500)
-
-        Unity.logger&.error(
-          { 'message' => message, '@trace_id' => trace_id }.merge!(data)
-        )
+        super(message, data, 409)
       end
     end
   end

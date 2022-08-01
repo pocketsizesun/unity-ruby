@@ -2,70 +2,53 @@
 
 module Unity
   class Event
-    EventMalformatedError = Class.new(StandardError)
+    attr_reader :id, :type, :date, :data
 
-    def self.parse(str)
-      data = JSON.parse(str)
-      new(
-        timestamp: Time.at(data.fetch('timestamp', data['date']).to_i),
-        name: data.fetch('name'),
-        data: data.fetch('data')
-      )
-    rescue KeyError, JSON::ParserError
-      raise EventMalformatedError
-    end
-
-    def self.from_dynamo_item(item)
+    def self.from_json(item)
       new(
         id: item['id'],
-        name: item['n'],
-        timestamp: Time.at(item['t'].to_i),
-        data: item['d']
+        type: item['type'],
+        date: item['date'],
+        data: item['data']
       )
     end
 
-    def initialize(attributes)
-      @id = attributes[:id] || SecureRandom.uuid
-      @name = attributes.fetch(:name)
-      @timestamp = attributes[:timestamp] || Time.now
-      @data = attributes[:data] || {}
+    def initialize(type:, id: SecureRandom.uuid, date: Time.now, data: {})
+      @id = id
+      @type = type
+      @date = date
+      @data = data
     end
 
     def [](key)
-      data[key]
+      @data[key]
+    end
+
+    def source
+      @type.slice(0, @type.index(':'))
     end
 
     def deduplication_id
       Digest::SHA256.hexdigest(
-        Oj.dump([name, timestamp.to_i, data], mode: :compat)
+        Oj.dump([@type, @date.to_i, @data], mode: :compat)
       )
     end
 
     def content_sha256
-      Digest::SHA256.hexdigest(Oj.dump(data, mode: :compat))
+      Digest::SHA256.hexdigest(Oj.dump(@data, mode: :compat))
     end
 
     def as_json(*)
       {
-        'id' => id,
-        'name' => name,
-        'timestamp' => timestamp.to_i,
-        'data' => data
+        'id' => @id,
+        'type' => @type,
+        'date' => @date.to_i,
+        'data' => @data
       }
     end
 
     def to_json(*)
       as_json.to_json
-    end
-
-    def as_dynamo_item
-      {
-        'date' => timestamp.strftime('%Y-%m-%d'),
-        'n' => name,
-        'id' => id,
-        't' => timestamp.to_i,
-        'd' => data
-      }
     end
   end
 end
