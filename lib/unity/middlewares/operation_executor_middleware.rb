@@ -21,7 +21,7 @@ module Unity
           { 'content-type' => 'application/json' },
           [operation.call(env['unity.operation_input']).to_json]
         ]
-      rescue Unity::Operation::Error => e
+      rescue Unity::Operation::OperationError => e
         operation_error(env, e)
       rescue Exception => e # rubocop:disable Lint/RescueException
         uncaught_exception(env, e)
