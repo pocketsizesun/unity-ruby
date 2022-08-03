@@ -24,6 +24,10 @@ module Unity
       @data[key.to_s] = value
     end
 
+    def empty?
+      @data.empty?
+    end
+
     def as_json
       @data.as_json
     end

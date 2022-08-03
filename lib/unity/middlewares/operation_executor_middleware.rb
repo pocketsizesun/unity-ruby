@@ -15,12 +15,17 @@ module Unity
         return operation_not_found if operation_handler.nil?
 
         operation = operation_handler.new(env['unity.operation_context'])
+        result = operation.call(env['unity.operation_input'])
 
-        [
-          200,
-          { 'content-type' => 'application/json' },
-          [operation.call(env['unity.operation_input']).to_json]
-        ]
+        if !result.empty?
+          [
+            200,
+            { 'content-type' => 'application/json' },
+            [result.to_json]
+          ]
+        else
+          [204, {}, []]
+        end
       rescue Unity::Operation::OperationError => e
         operation_error(env, e)
       rescue Exception => e # rubocop:disable Lint/RescueException
