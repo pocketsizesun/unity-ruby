@@ -5,6 +5,8 @@ module Unity
     class OperationExecutorMiddleware
       OPERATION_NOT_FOUND_RESPONSE = '{"error":"Operation not found","data":{}}'
       EMPTY_BODY = [].freeze
+      EMPTY_HEADERS = {}.freeze
+      SEND_JSON_HEADERS = { 'content-type' => 'application/json' }.freeze
 
       def initialize(app)
         @app = app
@@ -19,13 +21,9 @@ module Unity
         result = operation.call(env['unity.operation_input'])
 
         if !result.empty?
-          [
-            200,
-            { 'content-type' => 'application/json' },
-            [result.to_json]
-          ]
+          [200, SEND_JSON_HEADERS, [result.to_json]]
         else
-          [204, {}, EMPTY_BODY]
+          [204, EMPTY_HEADERS, EMPTY_BODY]
         end
       rescue Unity::Operation::OperationError => e
         operation_error(env, e)
@@ -36,7 +34,7 @@ module Unity
       private
 
       def send_json(code, body)
-        [code, { 'content-type' => 'application/json' }, [body]]
+        [code, SEND_JSON_HEADERS, [body]]
       end
 
       def operation_not_found
