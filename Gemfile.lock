@@ -4,12 +4,6 @@ GIT
   specs:
     unity-logger (1.0.1)
 
-GIT
-  remote: git@github.com:pocketsizesun/unity-urn-ruby.git
-  revision: 5f4b2bff7ef394309222304a81ac051d245b4a6c
-  specs:
-    unity-urn (1.0.3)
-
 PATH
   remote: .
   specs:
@@ -141,7 +135,6 @@ DEPENDENCIES
   rubocop
   unity!
   unity-logger!
-  unity-urn!
 
 BUNDLED WITH
    2.2.3

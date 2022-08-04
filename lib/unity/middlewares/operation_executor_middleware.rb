@@ -4,6 +4,7 @@ module Unity
   module Middlewares
     class OperationExecutorMiddleware
       OPERATION_NOT_FOUND_RESPONSE = '{"error":"Operation not found","data":{}}'
+      EMPTY_BODY = [].freeze
 
       def initialize(app)
         @app = app
@@ -24,7 +25,7 @@ module Unity
             [result.to_json]
           ]
         else
-          [204, {}, []]
+          [204, {}, EMPTY_BODY]
         end
       rescue Unity::Operation::OperationError => e
         operation_error(env, e)
