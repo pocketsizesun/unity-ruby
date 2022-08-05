@@ -4,6 +4,15 @@ module Unity
   class Event
     attr_reader :id, :type, :date, :data
 
+    def self.from_event_bridge(item)
+      new(
+        id: item['id'],
+        type: item['detail-type'],
+        date: Time.parse(item['time']),
+        data: item['detail']
+      )
+    end
+
     def self.from_json(item)
       new(
         id: item['id'],
