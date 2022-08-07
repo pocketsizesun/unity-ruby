@@ -38,6 +38,11 @@ require 'unity/operation'
 require 'unity/operation_context'
 require 'unity/record_handler'
 
+# model
+require_relative 'unity/tag_set'
+require_relative 'unity/model/tag_set_type'
+ActiveModel::Type.register(:tagset, Unity::Model::TagSetType)
+
 # utils
 require 'unity/utils/dynamo_filter_expression_builder'
 require 'unity/utils/dynamo_date_range_with_time_id_query'
