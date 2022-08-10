@@ -26,7 +26,7 @@ module Unity
 
       unless obj.valid?
         errors = obj.errors.collect do |error|
-          if error.attribute == '@'
+          if error.attribute == :_
             error.message
           else
             format(ERROR_MESSAGE, error.attribute, error.message)
