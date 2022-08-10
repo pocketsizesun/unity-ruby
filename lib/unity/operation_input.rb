@@ -26,7 +26,11 @@ module Unity
 
       unless obj.valid?
         errors = obj.errors.collect do |error|
-          format(ERROR_MESSAGE, error.attribute, error.message)
+          if error.attribute == '@'
+            error.message
+          else
+            format(ERROR_MESSAGE, error.attribute, error.message)
+          end
         end
 
         raise ::Unity::Operation::ValidationError.new(
