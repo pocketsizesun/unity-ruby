@@ -2,14 +2,15 @@
 
 module Unity
   class Event
-    attr_reader :id, :type, :date, :data
+    attr_reader :id, :type, :date, :data, :replay_name
 
     def self.from_event_bridge(item)
       new(
         id: item['id'],
         type: item['detail-type'],
         date: Time.parse(item['time']),
-        data: item['detail']
+        data: item['detail'],
+        replay_name: item['replay-name']
       )
     end
 
@@ -18,15 +19,17 @@ module Unity
         id: item['id'],
         type: item['type'],
         date: item['date'],
-        data: item['data']
+        data: item['data'],
+        replay_name: item['replay_name']
       )
     end
 
-    def initialize(type:, id: SecureRandom.uuid, date: Time.now, data: {})
-      @id = id
-      @type = type
-      @date = date
-      @data = data
+    def initialize(attributes = {})
+      @id = attributes[:id] || SecureRandom.uuid
+      @type = attributes[:type]
+      @date = attributes[:date] || Time.now
+      @data = attributes[:data].is_a?(Hash) ? attributes[:data] : {}
+      @replay_name = attributes[:replay_name]
     end
 
     def [](key)
@@ -38,13 +41,19 @@ module Unity
     end
 
     def deduplication_id
-      Digest::SHA256.hexdigest(
-        Oj.dump([@type, @date.to_i, @data], mode: :compat)
-      )
+      sha256 = Digest::SHA256.new
+      sha256 << @type
+      sha256 << @date.to_i.to_s
+      sha256 << @data.to_json
+      sha256.hexdigest
     end
 
     def content_sha256
-      Digest::SHA256.hexdigest(Oj.dump(@data, mode: :compat))
+      Digest::SHA256.hexdigest(JSON.dump(@data))
+    end
+
+    def replayed?
+      !@replay_name.nil?
     end
 
     def as_json(*)
@@ -52,7 +61,8 @@ module Unity
         'id' => @id,
         'type' => @type,
         'date' => @date.to_i,
-        'data' => @data
+        'data' => @data,
+        'replay_name' => @replay_name
       }
     end
 
