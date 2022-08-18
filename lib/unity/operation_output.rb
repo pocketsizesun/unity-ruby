@@ -23,7 +23,7 @@ module Unity
     end
 
     def to_json(*)
-      Oj.dump(as_json, mode: :compat)
+      JSON.dump(@data.as_json)
     end
   end
 end
