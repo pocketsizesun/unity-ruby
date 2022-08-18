@@ -34,7 +34,8 @@ module Unity
         end
 
         raise ::Unity::Operation::ValidationError.new(
-          "Validation error: #{errors.join(', ')}"
+          "Validation error: #{errors.join(', ')}",
+          'errors' => obj.errors.details
         )
       end
 
