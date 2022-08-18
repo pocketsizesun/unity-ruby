@@ -49,10 +49,20 @@ module Unity
     class ValidationError < StandardError
       attr_reader :model
 
+      ERROR_MESSAGE = '`%s` %s'
+
       def initialize(model)
         @model = model
 
-        super(@model.errors.full_messages.join(', '))
+        super(
+          model.errors.collect do |error|
+            if error.attribute == :_
+              error.message
+            else
+              format(ERROR_MESSAGE, error.attribute, error.message)
+            end
+          end.join(', ')
+        )
       end
     end
   end
