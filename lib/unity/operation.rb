@@ -76,5 +76,12 @@ module Unity
         super(message, data, 409)
       end
     end
+
+    # HTTP Error Code: 500
+    class ServerError < OperationError
+      def initialize(message, data = {})
+        super(message, data, 500)
+      end
+    end
   end
 end
