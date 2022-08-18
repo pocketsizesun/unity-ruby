@@ -49,7 +49,7 @@ module Unity
       end
 
       def as_json
-        { 'error' => message, 'trace_id' => @trace_id, 'data' => data }
+        { 'trace_id' => @trace_id, 'error' => message, 'data' => data }
       end
     end
 
