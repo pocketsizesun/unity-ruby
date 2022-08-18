@@ -39,5 +39,21 @@ module Unity
         @attributes.write_from_database(attr_name.name, attr_value)
       end
     end
+
+    def valid!
+      return true if valid?
+
+      raise ValidationError, self
+    end
+
+    class ValidationError < StandardError
+      attr_reader :model
+
+      def initialize(model)
+        @model = model
+
+        super(@model.errors.full_messages.join(', '))
+      end
+    end
   end
 end
