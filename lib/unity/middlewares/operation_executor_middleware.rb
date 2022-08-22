@@ -50,10 +50,6 @@ module Unity
         [code, SEND_JSON_HEADERS, [JSON.dump(body)]]
       end
 
-      def internal_server_error(data)
-        [500, SEND_JSON_HEADERS, [JSON.dump({ 'error' => 'INTERNAL_SERVER_ERROR', 'data' => data })]]
-      end
-
       def uncaught_exception(env, exception)
         trace_id = SecureRandom.urlsafe_base64(18)
 
@@ -75,7 +71,7 @@ module Unity
 
           [500, SEND_JSON_HEADERS, [JSON.dump(data)]]
         else
-          [500, SEND_JSON_HEADERS, [JSON.dump({ 'trace_id' => trace_id })]]
+          [500, SEND_JSON_HEADERS, [JSON.dump({ 'trace_id' => trace_id, 'error' => 'Internal Server Error' })]]
         end
       end
     end
