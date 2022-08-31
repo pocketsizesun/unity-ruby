@@ -49,6 +49,10 @@ module Unity
       instance.route(path, handler, &block)
     end
 
+    def self.config_for(*args)
+      instance.config_for(*args)
+    end
+
     def initialize
       @module = find_module
       @logger = ::Logger.new(STDOUT)
@@ -88,13 +92,7 @@ module Unity
         raise "Configuration file not found: #{filename}"
       end
 
-      config_data = YAML.load(ERB.new(File.read(filename)).result(binding))
-      @file_configurations[name] = \
-        if config_data.is_a?(Hash)
-          config_data.fetch(Unity.env)
-        else
-          {}
-        end
+      YAML.load(ERB.new(File.read(filename)).result(binding)).fetch(Unity.env)
     end
 
     def load_tasks

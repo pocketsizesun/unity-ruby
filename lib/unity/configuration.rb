@@ -31,6 +31,14 @@ module Unity
       @options[key.to_sym] = value
     end
 
+    def set(key, value)
+      @options[key.to_sym] = value
+    end
+
+    def get(key)
+      @options[key.to_sym]
+    end
+
     def method_missing(method_name, *args, &block)
       method_name_str = method_name.to_s
       if method_name_str.include?('=')
