@@ -2,7 +2,7 @@
 
 module Unity
   class Application
-    attr_reader   :booted_at, :operations
+    attr_reader   :booted_at, :operations, :routes
     attr_accessor :logger
 
     def self.inherited(base)
@@ -45,13 +45,22 @@ module Unity
       instance.name = arg
     end
 
+    def self.route(path, handler = nil, &block)
+      instance.route(path, handler, &block)
+    end
+
     def initialize
       @module = find_module
       @logger = ::Logger.new(STDOUT)
       @operations = {}
       @booted_at = Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
-      @rack_app = nil
       @file_configurations = {}
+      @routes = []
+      @router_middleware = Unity::Middlewares::RouterMiddleware.new(self)
+    end
+
+    def route(path, handler = nil, &block)
+      @routes << Route.new(path, handler || block)
     end
 
     def find_module
@@ -146,9 +155,6 @@ module Unity
         Unity.logger&.debug "load initializer file: #{file}"
         require "#{Unity.root}/config/initializers/#{file}"
       end
-
-      # build rack app
-      @rack_app = build_rack_app
     end
 
     def find_operation(name)
@@ -156,39 +162,22 @@ module Unity
     end
 
     def call(env)
-      @rack_app.call(env)
-    end
+      # parse incoming request to {Rack::Request}
+      request = Rack::Request.new(env)
+      env['rack.request'] = request
+      env['unity.operation_name'] = env['rack.request'].params.fetch('Operation', nil)
+      env['unity.operation_context'] = Unity::OperationContext.new
+      env['unity.operation_input'] = JSON.load(request.body) || {}
 
-    private
-
-    def render_error(error, data = {}, code = 400)
+      @router_middleware.call(env)
+    rescue JSON::ParserError => e
       [
-        code,
+        500,
         { 'content-type' => 'application/json' },
-        [JSON.dump({ 'error' => error, 'data' => data })]
+        [
+          { 'error' => "JSON parser error: #{e.message}" }.to_json
+        ]
       ]
-    end
-
-    def parse_request_body(request)
-      JSON.parse(request.body.read)
-    end
-
-    def build_rack_app
-      __self__ = self
-
-      Rack::Builder.new do
-        map '/_status' do
-          run Unity::Middlewares::HealthCheckMiddleware.new(__self__)
-        end
-
-        use Unity::Middlewares::RequestParserMiddleware
-
-        __self__.config.middlewares.each do |middleware|
-          use middleware, app: __self__
-        end
-
-        run Unity::Middlewares::OperationExecutorMiddleware.new(__self__)
-      end.to_app
     end
   end
 end
