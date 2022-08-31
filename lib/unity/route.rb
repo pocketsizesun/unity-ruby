@@ -9,8 +9,8 @@ module Unity
       @handler = handler
     end
 
-    def call(env)
-      @handler.call(env)
+    def call(request)
+      @handler.call(request)
     end
 
     def match?(tested_path)

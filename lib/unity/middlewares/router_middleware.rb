@@ -20,7 +20,7 @@ module Unity
           @app.routes.each do |route|
             next unless route.match?(request_path)
 
-            return route.call(env)
+            return route.call(env['rack.request'])
           end
 
           [404, {}, []]
