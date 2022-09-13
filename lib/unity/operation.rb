@@ -6,6 +6,11 @@ module Unity
 
     OperationContext = Class.new(Hash)
     Output = ::Unity::OperationOutput
+    EmptyOutput = Class.new(::Unity::OperationOutput) do
+      def initialize(code = 204)
+        super(nil, code)
+      end
+    end
 
     def self.input(klass = nil, &block)
       @input_klass = klass || Class.new(Unity::OperationInput, &block)

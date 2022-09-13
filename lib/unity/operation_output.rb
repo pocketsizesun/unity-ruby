@@ -2,8 +2,11 @@
 
 module Unity
   class OperationOutput
-    def initialize(data = {})
+    attr_accessor :code
+
+    def initialize(data = {}, code = nil)
       @data = data
+      @code = code
     end
 
     def [](key)
@@ -15,15 +18,23 @@ module Unity
     end
 
     def empty?
-      @data.empty?
+      @data.nil? || @data.empty?
     end
 
     def as_json
-      @data.as_json
+      @data&.as_json
     end
 
-    def to_json(*)
-      JSON.dump(@data.as_json)
+    def as_rack_response
+      if !@data.nil? && !@data.empty?
+        [
+          @code || 200,
+          { 'content-type' => 'application/json' },
+          [JSON.dump(@data&.as_json)]
+        ]
+      else
+        [@code || 204, { 'content-type' => 'application/json' }, []]
+      end
     end
   end
 end

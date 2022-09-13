@@ -4,8 +4,6 @@ module Unity
   module Middlewares
     class OperationExecutorMiddleware
       OPERATION_NOT_FOUND_RESPONSE = '{"error":"Operation not found","data":{}}'
-      EMPTY_BODY = [].freeze
-      EMPTY_HEADERS = {}.freeze
       SEND_JSON_HEADERS = { 'content-type' => 'application/json' }.freeze
 
       def initialize(app)
@@ -18,7 +16,7 @@ module Unity
 
         # if operation does not exists, return a 404 error
         if operation_handler.nil?
-          return [404, SEND_JSON_HEADERS, [OPERATION_NOT_FOUND_RESPONSE]]
+          return [404, SEND_JSON_HEADERS.dup, [OPERATION_NOT_FOUND_RESPONSE]]
         end
 
         # create operation instance
@@ -27,19 +25,9 @@ module Unity
         # call operation with operation input
         result = operation.call(env['unity.operation_input'])
 
-        if !result.empty?
-          [200, SEND_JSON_HEADERS, [result.to_json]]
-        else
-          [204, EMPTY_HEADERS, EMPTY_BODY]
-        end
+        result.as_rack_response
       rescue Unity::Operation::OperationError => e
-        if e.is_a?(Unity::Operation::ServerError)
-          Unity.logger.error(
-            { 'trace_id' => e.trace_id, 'message' => e.message }.merge!(e.data)
-          )
-        end
-
-        [e.code, SEND_JSON_HEADERS, [JSON.dump(e.as_json)]]
+        [exception.code, SEND_JSON_HEADERS.dup, [JSON.dump(exception.as_json)]]
       rescue Exception => e # rubocop:disable Lint/RescueException
         uncaught_exception(env, e)
       end
@@ -47,7 +35,7 @@ module Unity
       private
 
       def send_json(code, body)
-        [code, SEND_JSON_HEADERS, [JSON.dump(body)]]
+        [code, SEND_JSON_HEADERS.dup, [JSON.dump(body)]]
       end
 
       def uncaught_exception(env, exception)
@@ -69,9 +57,9 @@ module Unity
             'data' => { 'backtrace' => exception.backtrace }
           }
 
-          [500, SEND_JSON_HEADERS, [JSON.dump(data)]]
+          [500, SEND_JSON_HEADERS.dup, [JSON.dump(data)]]
         else
-          [500, SEND_JSON_HEADERS, [JSON.dump({ 'trace_id' => trace_id, 'error' => 'Internal Server Error' })]]
+          [500, SEND_JSON_HEADERS.dup, [JSON.dump({ 'trace_id' => trace_id, 'error' => 'Internal Server Error' })]]
         end
       end
     end

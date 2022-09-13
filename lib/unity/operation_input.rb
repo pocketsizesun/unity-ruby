@@ -12,7 +12,11 @@ module Unity
     ERROR_MESSAGE = '`%s` %s'
 
     def self.model_name
-      @model_name ||= ActiveModel::Name.new(self, nil, 'input')
+      @model_name ||= ActiveModel::Name.new(self, nil, '_')
+    end
+
+    def self.model_name=(arg)
+      @model_name = ActiveModel::Name.new(self, nil, arg.to_s)
     end
 
     def self.load(hash)
@@ -41,7 +45,25 @@ module Unity
 
       obj
     rescue ActiveModel::UnknownAttributeError => e
-      raise ::Unity::Operation::OperationError, "Unknown parameter '#{e.attribute}'"
+      if model_name.name == '_'
+        raise ::Unity::Operation::OperationError, "Unknown parameter '#{e.attribute}'"
+      else
+        raise ::Unity::Operation::OperationError, "Unknown parameter '#{model_name.name}.#{e.attribute}'"
+      end
+    end
+
+    def self.shape(name, &block)
+      # create anonymous Shape class
+      shape_klass = Class.new(Unity::OperationInput, &block)
+      shape_klass.model_name = name
+
+      # define active model attribute
+      attribute(name, ShapeType.new(shape_klass))
+
+      # add validator
+      validate do
+        public_send(name).valid?
+      end
     end
 
     def require(attr_name)
@@ -52,6 +74,25 @@ module Unity
         "Missing required parameter '#{attr_name}'",
         'parameter_name' => attr_name
       )
+    end
+
+    class ShapeType < ActiveModel::Type::Value
+      def initialize(shape_klass)
+        super()
+
+        @shape_klass = shape_klass
+      end
+
+      def cast(value)
+        case value
+        when @shape_klass then value
+        when Hash then @shape_klass.load(value)
+        end
+      end
+
+      def deserialize(value)
+        raise "deserialize: #{value}"
+      end
     end
   end
 end
