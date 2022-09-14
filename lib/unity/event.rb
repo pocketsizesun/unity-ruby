@@ -44,12 +44,12 @@ module Unity
       sha256 = Digest::SHA256.new
       sha256 << @type
       sha256 << @date.to_i.to_s
-      sha256 << @data.to_json
+      sha256 << JSON.fast_generate(@data)
       sha256.hexdigest
     end
 
     def content_sha256
-      Digest::SHA256.hexdigest(JSON.dump(@data))
+      Digest::SHA256.hexdigest(JSON.fast_generate(@data))
     end
 
     def replayed?

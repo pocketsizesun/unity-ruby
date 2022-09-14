@@ -30,7 +30,7 @@ module Unity
         [
           @code || 200,
           { 'content-type' => 'application/json' },
-          [JSON.dump(@data&.as_json)]
+          [JSON.fast_generate(@data&.as_json)]
         ]
       else
         [@code || 204, { 'content-type' => 'application/json' }, []]

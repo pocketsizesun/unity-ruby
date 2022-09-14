@@ -19,7 +19,7 @@ module Unity
     end
 
     def respond_with_json(data, status: 200, headers: {})
-      [status, { 'Content-Type' => 'application/json' }.merge!(headers), [JSON.dump(data)]]
+      [status, { 'Content-Type' => 'application/json' }.merge!(headers), [JSON.fast_generate(data)]]
     end
 
     def head(status)

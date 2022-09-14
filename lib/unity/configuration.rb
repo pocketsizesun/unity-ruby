@@ -7,7 +7,8 @@ module Unity
         time_zone: 'UTC',
         concurrency: ENV.fetch('CONCURRENCY', 4).to_i,
         log_level: Logger::INFO,
-        middlewares: []
+        middlewares: [],
+        logger: Logger.new(STDOUT)
       }
     end
 

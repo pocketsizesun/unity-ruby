@@ -62,7 +62,7 @@ module Unity
   end
 
   def self.application
-    @application ||= app_class&.instance
+    @application ||= app_class
   end
 
   def self.logger

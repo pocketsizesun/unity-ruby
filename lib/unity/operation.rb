@@ -56,6 +56,10 @@ module Unity
       def as_json
         { 'trace_id' => @trace_id, 'error' => message, 'data' => data }
       end
+
+      def as_rack_response
+        [code, { 'content-type' => 'application/json' }, [JSON.fast_generate(as_json)]]
+      end
     end
 
     class ValidationError < OperationError
