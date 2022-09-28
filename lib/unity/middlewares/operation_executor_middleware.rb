@@ -5,6 +5,7 @@ module Unity
     class OperationExecutorMiddleware
       OPERATION_NOT_FOUND_RESPONSE = '{"error":"Operation not found","data":{}}'
       SEND_JSON_HEADERS = { 'content-type' => 'application/json' }.freeze
+      RACK_INPUT_ENV = 'rack.input'
       OPERATION_NAME_ENV = 'unity.operation_name'
       OPERATION_CONTEXT_ENV = 'unity.operation_context'
       OPERATION_INPUT_ENV = 'unity.operation_input'
@@ -14,7 +15,7 @@ module Unity
       end
 
       def call(env)
-        env[OPERATION_INPUT_ENV] = JSON.parse(request.body.read) || {}
+        env[OPERATION_INPUT_ENV] = parse_request_body(env[RACK_INPUT_ENV]&.read)
         operation_name = env[OPERATION_NAME_ENV]
         operation_handler = @app.find_operation(operation_name)
 
@@ -37,6 +38,12 @@ module Unity
       end
 
       private
+
+      def parse_request_body(value)
+        JSON.parse(value)
+      rescue JSON::ParserError
+        {}
+      end
 
       def send_json(code, data)
         [code, SEND_JSON_HEADERS.dup, [JSON.fast_generate(data)]]
