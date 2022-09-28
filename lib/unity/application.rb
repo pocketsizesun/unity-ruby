@@ -35,6 +35,10 @@ module Unity
         @routes
       end
 
+      def logger
+        @logger
+      end
+
       def configure(&block)
         instance_eval(&block)
       end
