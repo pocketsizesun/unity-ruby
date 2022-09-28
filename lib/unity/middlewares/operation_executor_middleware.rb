@@ -14,6 +14,7 @@ module Unity
       end
 
       def call(env)
+        env[OPERATION_INPUT_ENV] = JSON.parse(request.body.read) || {}
         operation_name = env[OPERATION_NAME_ENV]
         operation_handler = @app.find_operation(operation_name)
 

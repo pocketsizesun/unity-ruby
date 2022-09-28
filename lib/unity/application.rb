@@ -7,7 +7,6 @@ module Unity
 
     OPERATION_NAME_ENV = 'unity.operation_name'
     OPERATION_CONTEXT_ENV = 'unity.operation_context'
-    OPERATION_INPUT_ENV = 'unity.operation_input'
     RACK_REQUEST_ENV = 'rack.request'
 
     def self.inherited(base)
@@ -30,6 +29,10 @@ module Unity
 
       def operations
         @operations
+      end
+
+      def routes
+        @routes
       end
 
       def configure(&block)
@@ -130,7 +133,6 @@ module Unity
         env[RACK_REQUEST_ENV] = request
         env[OPERATION_NAME_ENV] = env['rack.request'].params.fetch('Operation', nil)
         env[OPERATION_CONTEXT_ENV] ||= Unity::OperationContext.new
-        env[OPERATION_INPUT_ENV] = JSON.parse(request.body.read) || {}
 
         @router_middleware.call(env)
       rescue JSON::ParserError => e
