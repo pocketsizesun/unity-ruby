@@ -132,12 +132,6 @@ module Unity
       end
 
       def call(env)
-        # parse incoming request to {Rack::Request}
-        request = Rack::Request.new(env)
-        env[RACK_REQUEST_ENV] = request
-        env[OPERATION_NAME_ENV] = env['rack.request'].params.fetch('Operation', nil)
-        env[OPERATION_CONTEXT_ENV] ||= Unity::OperationContext.new
-
         @router_middleware.call(env)
       rescue JSON::ParserError => e
         [

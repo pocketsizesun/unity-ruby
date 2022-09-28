@@ -16,6 +16,7 @@ module Unity
 
       def call(env)
         env[OPERATION_INPUT_ENV] = parse_request_body(env[RACK_INPUT_ENV]&.read)
+
         operation_name = env[OPERATION_NAME_ENV]
         operation_handler = @app.find_operation(operation_name)
 

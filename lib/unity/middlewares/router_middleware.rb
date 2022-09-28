@@ -7,6 +7,8 @@ module Unity
       HEALTH_CHECK_PATH = '/_status'
       OPERATION_EXECUTION_PATH = '/'
       RACK_REQUEST_ENV = 'rack.request'
+      OPERATION_NAME_ENV = 'unity.operation_name'
+      OPERATION_CONTEXT_ENV = 'unity.operation_context'
 
       def initialize(app)
         @app = app
@@ -14,8 +16,13 @@ module Unity
       end
 
       def call(env)
-        request_path = env[RACK_REQUEST_ENV].path
+        request = Rack::Request.new(env)
+        request_path = request.path
+
         if request_path.empty? || request_path == OPERATION_EXECUTION_PATH
+          env[OPERATION_NAME_ENV] = request.params['Operation']
+          env[OPERATION_CONTEXT_ENV] ||= Unity::OperationContext.new
+
           @operation_executor.call(env)
         elsif request_path == HEALTH_CHECK_PATH
           health_check_response
@@ -23,7 +30,7 @@ module Unity
           @app.routes.each do |route|
             next unless route.match?(request_path)
 
-            return route.call(env[RACK_REQUEST_ENV])
+            return route.call(request)
           end
 
           [404, {}, []]
