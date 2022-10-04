@@ -2,9 +2,13 @@
 
 module Unity
   class EventEmitter
-    def initialize(source, event_bus_name, **kwargs)
+    def initialize(source, event_bus_name: nil, **kwargs)
       @source = source
-      @event_bus_name = event_bus_name
+      @event_bus_name = event_bus_name || ENV['UNITY_EVENT_EMITTER_BUS_NAME']
+      if @event_bus_name.nil?
+        raise ArgumentError, 'Event bus name must be provided'
+      end
+
       @eventbridge = kwargs[:event_bridge_client] || Aws::EventBridge::Client.new
     end
 
