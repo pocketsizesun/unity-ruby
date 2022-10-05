@@ -48,13 +48,12 @@ module Unity
       def initialize(message, data = {}, code = 400)
         super(message)
 
-        @trace_id = SecureRandom.urlsafe_base64(18)
         @data = data
         @code = code
       end
 
       def as_json
-        { 'trace_id' => @trace_id, 'error' => message, 'data' => data }
+        { 'error' => message, 'data' => data }
       end
 
       def as_rack_response

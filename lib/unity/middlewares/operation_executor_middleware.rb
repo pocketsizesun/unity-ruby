@@ -64,12 +64,19 @@ module Unity
         )
 
         if @app.config.report_exception == true
-          data = {
-            'message' => "#{exception.message} (#{exception.class})",
-            'data' => { 'backtrace' => exception.backtrace }
-          }
-
-          [500, SEND_JSON_HEADERS.dup, [JSON.fast_generate(data)]]
+          [
+            500,
+            SEND_JSON_HEADERS.dup,
+            [
+              JSON.fast_generate(
+                {
+                  'trace_id' => trace_id,
+                  'message' => "#{exception.message} (#{exception.class})",
+                  'data' => { 'backtrace' => exception.backtrace }
+                }
+              )
+            ]
+          ]
         else
           [500, SEND_JSON_HEADERS.dup, [JSON.fast_generate({ 'trace_id' => trace_id, 'error' => 'Internal Server Error' })]]
         end
