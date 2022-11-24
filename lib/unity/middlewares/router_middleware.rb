@@ -43,7 +43,7 @@ module Unity
         [
           200,
           { 'content-type' => 'application/json' },
-          [format(HEALTH_CHECK_RESPONSE, @app.uptime, @app.name)]
+          [format(HEALTH_CHECK_RESPONSE, @app.uptime, @app.app_name)]
         ]
       end
     end

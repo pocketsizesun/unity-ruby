@@ -28,7 +28,7 @@ module Unity
 
     def initialize(namespace: nil, redlock: nil)
       @redlock = redlock || Unity::Utils::RedisService.instance.redlock
-      @namespace = namespace || Unity.application.config.redlock[:namespace] || Unity.application.name
+      @namespace = namespace || Unity.application.config.redlock[:namespace] || Unity.application.app_name
     end
 
     def with_lock!(name, ttl: DEFAULT_LOCK_TTL)
