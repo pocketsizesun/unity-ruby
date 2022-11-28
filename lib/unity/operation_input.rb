@@ -19,6 +19,8 @@ module Unity
       @model_name = ActiveModel::Name.new(self, nil, arg.to_s)
     end
 
+    # @param hash [Hash<String, Object>]
+    # @return [self]
     def self.load(hash)
       # sanitize attributes
       attributes = hash.reject { |key, _| key[0] == '#' }
