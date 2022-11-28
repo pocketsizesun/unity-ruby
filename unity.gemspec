@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'activemodel', '~> 6.0'
+  spec.add_dependency 'activemodel', '> 6'
   spec.add_dependency 'aws-sdk-sns', '~> 1.36'
   spec.add_dependency 'aws-sdk-sqs', '~> 1.34'
   spec.add_dependency 'unity-dynamodb-attribute-deserializer', '~> 1.0'

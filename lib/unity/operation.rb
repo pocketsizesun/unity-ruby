@@ -12,7 +12,7 @@ module Unity
       end
     end
 
-    # @yieldparam [Unity::OperationInput]
+    # @yieldself [Unity::OperationInput]
     def self.input(klass = nil, &block)
       @input_klass = klass || Class.new(Unity::OperationInput, &block)
     end
