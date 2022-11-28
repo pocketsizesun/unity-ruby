@@ -16,10 +16,14 @@ module Unity
       )
     end
 
+    # @param attributes [Hash<String, Object>]
+    # @return [self]
     def self.init_with_attributes(attributes)
       allocate.initialize_with(attributes, false)
     end
 
+    # @param attributes [Hash<String, Object>]
+    # @return [self]
     def initialize_with(attributes, new_record = false)
       @attributes = self.class.attribute_builder.build_from_database(attributes)
       @new_record = new_record
