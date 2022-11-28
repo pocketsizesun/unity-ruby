@@ -57,14 +57,22 @@ module Unity
     @app_class = klass
   end
 
+  # @return [Class<Unity::Application>]
   def self.app_class
     @app_class
   end
 
+  # @return [Unity::Application]
   def self.application
-    @application ||= app_class
+    @application
   end
 
+  # @return [Unity::Application]
+  def self.application=(inst)
+    @application = inst
+  end
+
+  # @return [Logger]
   def self.logger
     application.logger
   end
@@ -77,10 +85,12 @@ module Unity
     @env = arg.to_s
   end
 
+  # @return [String]
   def self.env
     @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
   end
 
+  # @return [String]
   def self.environment
     env
   end
@@ -89,6 +99,7 @@ module Unity
     self.env = arg
   end
 
+  # @return [String]
   def self.root
     @root ||= Dir.pwd
   end
@@ -119,10 +130,12 @@ module Unity
     application&.load_tasks
   end
 
+  # @return [Integer]
   def self.current_timestamp
     Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
   end
 
+  # @return [Time]
   def self.current_time
     Time.at(Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i)
   end
