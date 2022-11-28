@@ -12,7 +12,6 @@ module Unity
     ERROR_MESSAGE = '`%s` %s'
 
     def self.model_name
-      attribute
       @model_name ||= ActiveModel::Name.new(self, nil, '_')
     end
 
