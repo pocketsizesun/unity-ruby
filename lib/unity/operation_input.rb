@@ -49,9 +49,9 @@ module Unity
       obj
     rescue ActiveModel::UnknownAttributeError => e
       if model_name.name == '_'
-        raise ::Unity::Operation::OperationError, "Unknown parameter '#{e.attribute}'"
+        raise ::Unity::Operation::OperationError.new("Unknown parameter '#{e.attribute}'")
       else
-        raise ::Unity::Operation::OperationError, "Unknown parameter '#{model_name.name}.#{e.attribute}'"
+        raise ::Unity::Operation::OperationError.new("Unknown parameter '#{model_name.name}.#{e.attribute}'")
       end
     end
 
