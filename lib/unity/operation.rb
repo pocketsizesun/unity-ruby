@@ -17,7 +17,7 @@ module Unity
       @input_klass = klass || Class.new(Unity::OperationInput, &block)
     end
 
-    # @return [Unity::OperationInput]
+    # @return [Class<Unity::OperationInput>]
     def self.input_klass
       @input_klass
     end
@@ -42,7 +42,7 @@ module Unity
       raise "#call not implemented for #{self.class}"
     end
 
-    # @return [Unity::OperationInput]
+    # @return [Class<Unity::OperationInput>]
     def input
       self.class.input_klass
     end
