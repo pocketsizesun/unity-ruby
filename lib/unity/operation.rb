@@ -12,10 +12,12 @@ module Unity
       end
     end
 
+    # @yieldparam [Unity::OperationInput]
     def self.input(klass = nil, &block)
       @input_klass = klass || Class.new(Unity::OperationInput, &block)
     end
 
+    # @return [Unity::OperationInput]
     def self.input_klass
       @input_klass
     end
@@ -34,10 +36,13 @@ module Unity
         end
     end
 
+    # @param args [Hash<String, Object>]
+    # @return [Unity::OperationOutput]
     def call(args)
       raise "#call not implemented for #{self.class}"
     end
 
+    # @return [Unity::OperationInput]
     def input
       self.class.input_klass
     end
@@ -62,6 +67,13 @@ module Unity
     end
 
     class ValidationError < OperationError
+    end
+
+    # HTTP Error Code: 403
+    class AuthenticationError < OperationError
+      def initialize(message, data = {})
+        super(message, data, 401)
+      end
     end
 
     # HTTP Error Code: 403
