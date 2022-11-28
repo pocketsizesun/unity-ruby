@@ -2,13 +2,6 @@
 
 module Unity
   class OperationInput
-    # @!method self.attribute(name, type, options)
-    #   Define an attribute
-    #   @param name [Symbol]
-    #   @param type [Symbol, Class, nil]
-    #   @param options [Hash<Symbol, Object>]
-    #   @return [void]
-
     include ActiveModel::Model
     include ActiveModel::Attributes
     include ActiveModel::AttributeMethods
