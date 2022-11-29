@@ -2,6 +2,14 @@
 
 module Unity
   class Model
+    # @!parse
+    #   # @param name [Symbol]
+    #   # @param type [Object]
+    #   # @param options [Object]
+    #   # @return [void]
+    #   def self.attribute(name, type, options)
+    #   end
+
     include ActiveModel::Model
     include ActiveModel::Attributes
     include ActiveModel::AttributeMethods
