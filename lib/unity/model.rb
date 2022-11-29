@@ -18,6 +18,7 @@ module Unity
     include ActiveModel::Serialization
     include ActiveModel::Serializers::JSON
 
+    # @return [ActiveModel::AttributeSet::Builder]
     def self.attribute_builder
       @attribute_builder ||= ActiveModel::AttributeSet::Builder.new(
         attribute_types
@@ -38,10 +39,12 @@ module Unity
       self
     end
 
+    # @return [self]
     def self.build!(*args)
       new(*args).tap(&:valid!)
     end
 
+    # @return [self]
     def self.build(*args)
       new(*args)
     end
