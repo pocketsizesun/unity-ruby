@@ -12,21 +12,11 @@ module Unity
       end
     end
 
-    # @yieldself [Unity::OperationInput]
-    def self.input(klass = nil, &block)
-      @input_klass = klass || Class.new(Unity::OperationInput, &block)
-    end
-
-    # @return [Class<Unity::OperationInput>]
-    def self.input_klass
-      @input_klass
-    end
-
     def self.call(args, context = nil)
       new(context).call(args)
     end
 
-    # @param [Hash] context - A key/value set of options
+    # @param [Unity::OperationContext] context
     def initialize(context = nil)
       @context = \
         if context.is_a?(Unity::OperationContext)
@@ -40,11 +30,6 @@ module Unity
     # @return [Unity::OperationOutput]
     def call(args)
       raise "#call not implemented for #{self.class}"
-    end
-
-    # @return [Class<Unity::OperationInput>]
-    def input
-      self.class.input_klass
     end
 
     class OperationError < Error
@@ -69,7 +54,7 @@ module Unity
     class ValidationError < OperationError
     end
 
-    # HTTP Error Code: 403
+    # HTTP Error Code: 401
     class AuthenticationError < OperationError
       def initialize(message, data = {})
         super(message, data, 401)
