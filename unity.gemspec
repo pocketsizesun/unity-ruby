@@ -28,10 +28,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'activemodel', '> 6'
-  spec.add_dependency 'aws-sdk-sns', '~> 1.36'
-  spec.add_dependency 'aws-sdk-sqs', '~> 1.34'
-  spec.add_dependency 'unity-dynamodb-attribute-deserializer', '~> 1.0'
-  spec.add_dependency 'unity-dynamodbstreams-event-parser', '~> 1.0'
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
   spec.add_dependency 'http', '~> 5.1'
   spec.add_dependency 'connection_pool', '~> 2.2'

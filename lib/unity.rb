@@ -14,7 +14,6 @@ require 'yaml'
 require 'dotenv/load'
 require 'http'
 require 'connection_pool'
-require 'aws-sdk-sns'
 require 'rack'
 require 'rack/builder'
 require 'active_model'
@@ -45,8 +44,6 @@ require_relative 'unity/model/tag_set_type'
 ActiveModel::Type.register(:tagset, Unity::Model::TagSetType)
 
 # utils
-require 'unity/utils/dynamo_filter_expression_builder'
-require 'unity/utils/dynamo_date_range_with_time_id_query'
 require 'unity/utils/time_parser'
 
 Encoding.default_internal = Encoding::UTF_8
