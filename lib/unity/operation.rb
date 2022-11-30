@@ -12,6 +12,9 @@ module Unity
       end
     end
 
+    # @param args [Hash<String, Object>]
+    # @param [Unity::OperationContext] context
+    # @return [Unity::OperationOutput]
     def self.call(args, context = nil)
       new(context).call(args)
     end

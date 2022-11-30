@@ -50,62 +50,65 @@ Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
 
 module Unity
-  def self.app_class=(klass)
+  module_function
+
+  # @param app_class [Class<Unity::Application>]
+  def app_class=(klass)
     @app_class = klass
   end
 
   # @return [Class<Unity::Application>]
-  def self.app_class
+  def app_class
     @app_class
   end
 
   # @return [Unity::Application]
-  def self.application
+  def application
     @application
   end
 
   # @return [Unity::Application]
-  def self.application=(inst)
+  def application=(inst)
     @application = inst
   end
 
   # @return [Logger]
-  def self.logger
+  def logger
     application.logger
   end
 
-  def self.logger=(arg)
+  def logger=(arg)
     application.logger = arg
   end
 
-  def self.env=(arg)
+  def env=(arg)
     @env = arg.to_s
   end
 
   # @return [String]
-  def self.env
+  def env
     @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
   end
 
   # @return [String]
-  def self.environment
+  def environment
     env
   end
 
-  def self.environment=(arg)
+  def environment=(arg)
     self.env = arg
   end
 
   # @return [String]
-  def self.root
+  def root
     @root ||= Dir.pwd
   end
 
-  def self.coordination
+  def coordination
     @coordination ||= Unity::Coordination.new
   end
 
-  def self.report_exception(tag = '@', &_block)
+  def report_exception(tag = '@', &_block)
     yield
   rescue Exception => e # rubocop:disable Lint/RescueException
     Unity.logger&.fatal(
@@ -116,11 +119,11 @@ module Unity
     raise e
   end
 
-  def self.gem_path
+  def gem_path
     @gem_path ||= File.realpath(File.dirname(__FILE__) + '/../')
   end
 
-  def self.load_tasks
+  def load_tasks
     Dir.glob("#{gem_path}/lib/tasks/{*,*/**}.rake").each do |filename|
       load filename
     end
@@ -128,12 +131,22 @@ module Unity
   end
 
   # @return [Integer]
-  def self.current_timestamp
+  def current_timestamp
     Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i
   end
 
   # @return [Time]
-  def self.current_time
+  def current_time
     Time.at(Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i)
+  end
+
+  # @return [Integer]
+  def concurrency
+    @concurrency ||= ENV.fetch('CONCURRENCY', 4).to_i
+  end
+
+  # @param value [Integer]
+  def concurrency=(value)
+    @concurrency = value.to_i
   end
 end
