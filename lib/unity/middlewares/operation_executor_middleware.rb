@@ -29,7 +29,13 @@ module Unity
         operation = operation_handler.new(env[OPERATION_CONTEXT_ENV])
 
         # call operation with operation input
-        result = operation.call(env[OPERATION_INPUT_ENV])
+        result = operation.call(
+          if !operation_handler.input_klass.nil?
+            operation_handler.input_klass.load(env[OPERATION_INPUT_ENV])
+          else
+            env[OPERATION_INPUT_ENV]
+          end
+        )
 
         result.as_rack_response
       rescue Unity::Operation::OperationError => e

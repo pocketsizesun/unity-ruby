@@ -12,11 +12,29 @@ module Unity
       end
     end
 
+    class << self
+      # @return [Class<Unity::OperationInput>]
+      attr_reader :input_klass
+    end
+
     # @param args [Hash<String, Object>]
     # @param [Unity::OperationContext] context
     # @return [Unity::OperationOutput]
     def self.call(args, context = nil)
       new(context).call(args)
+    end
+
+    # @param klass [Class<Unity::OperationInput>]
+    # @return [void]
+    def self.with_input_klass(klass)
+      @input_klass = klass
+    end
+
+    # Alias of `with_input_klass`
+    # @param klass [Class<Unity::OperationInput>]
+    # @return [void]
+    def self.with_input(klass)
+      @input_klass = klass
     end
 
     # @param [Unity::OperationContext] context
