@@ -61,11 +61,16 @@ module Unity
       raise ValidationError, self
     end
 
-    class ValidationError < StandardError
+    class Error < StandardError
+    end
+
+    class ValidationError < Error
+      # @param model [Unity::Model]
       attr_reader :model
 
       ERROR_MESSAGE = '`%s` %s'
 
+      # @param model [Unity::Model]
       def initialize(model)
         @model = model
 
@@ -78,6 +83,17 @@ module Unity
             end
           end.join(', ')
         )
+      end
+    end
+
+    class RecordNotUniqueError < Error
+      # @param model [Unity::Model]
+      attr_reader :model
+
+      # @param model [Unity::Model]
+      def initialize(model)
+        super("Record not unique #{model.model_name&.name}")
+        @model = model
       end
     end
   end
