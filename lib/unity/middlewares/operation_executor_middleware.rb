@@ -38,6 +38,8 @@ module Unity
         )
 
         result.as_rack_response
+      rescue Unity::Model::RecordNotUniqueError => e
+        [409, SEND_JSON_HEADERS.dup, [JSON.fast_generate({ 'error' => e.message })]]
       rescue Unity::Operation::OperationError => e
         e.as_rack_response
       rescue Exception => e # rubocop:disable Lint/RescueException

@@ -92,7 +92,7 @@ module Unity
 
       # @param model [Unity::Model]
       def initialize(model)
-        super("Record not unique #{model.model_name&.name}")
+        super("#{model.model_name&.name} already exists")
         @model = model
       end
     end
