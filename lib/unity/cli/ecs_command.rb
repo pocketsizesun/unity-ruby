@@ -49,10 +49,14 @@ module Unity
           end
         end.parse!(args)
 
-        @logger.info "Run ECS deploy in: #{@root_dir}"
-
         ecs_configuration = YAML.load_file(@configuration_file).fetch('ecs')
         environment_name = args.shift
+
+        @logger.info "Run ECS deploy in: #{@root_dir}"
+        @logger.info "Environment: #{environment_name}"
+        print "Continue? [y/N] "
+        answer = $stdin.gets.chomp.upcase
+        abort 'Aborted' unless answer == 'Y'
 
         if environment_name.nil? || environment_name.empty?
           @logger.fatal 'Environment must be provided, example: bundle exec unity ecs deploy staging'
