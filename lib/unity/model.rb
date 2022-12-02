@@ -16,6 +16,16 @@ module Unity
     #   @param options [Hash{Symbol => Object}, nil]
     #   @return [void]
 
+    # @!method self.validate(name, options = nil)
+    #   @param name [Symbol]
+    #   @param options [Hash{Symbol => Object}, nil]
+    #   @return [void]
+
+    # @!method self.validates(*fields, **options)
+    #   @param fields [Array<Symbol>]
+    #   @param options [Hash{Symbol => Object}, nil]
+    #   @return [void]
+
     # @return [ActiveModel::AttributeSet::Builder]
     def self.attribute_builder
       @attribute_builder ||= ActiveModel::AttributeSet::Builder.new(
