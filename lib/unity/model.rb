@@ -2,14 +2,6 @@
 
 module Unity
   class Model
-    # @!parse
-    #   # @param name [Symbol]
-    #   # @param type [Object]
-    #   # @param options [Object]
-    #   # @return [void]
-    #   def self.attribute(name, type, options)
-    #   end
-
     include ActiveModel::Model
     include ActiveModel::Attributes
     include ActiveModel::AttributeMethods
@@ -17,6 +9,12 @@ module Unity
     include ActiveModel::Validations
     include ActiveModel::Serialization
     include ActiveModel::Serializers::JSON
+
+    # @!method self.attribute(name, type = nil, options = nil)
+    #   @param name [Symbol]
+    #   @param type [Symbol, Object, nil]
+    #   @param options [Hash{Symbol => Object}, nil]
+    #   @return [void]
 
     # @return [ActiveModel::AttributeSet::Builder]
     def self.attribute_builder
