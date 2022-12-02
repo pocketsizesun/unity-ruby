@@ -89,7 +89,7 @@ module Unity
           cmd_args << "#{image_name}:#{image_tag_name}"
 
           # repository url
-          cmd_args << "#{image_repository_url}:#{tag_name}"
+          cmd_args << "#{image_repository_url}:#{image_tag_name}"
         end
 
         # push image
@@ -98,7 +98,7 @@ module Unity
           cmd_args << 'push'
 
           # push destination
-          cmd_args << "#{image_repository_url}:#{tag_name}"
+          cmd_args << "#{image_repository_url}:#{image_tag_name}"
         end
       end
 
