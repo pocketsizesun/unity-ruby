@@ -10,6 +10,7 @@ require:
 - logger
 - yaml
 - json
+- optparse
 domains: []
 reporters:
 - rubocop
