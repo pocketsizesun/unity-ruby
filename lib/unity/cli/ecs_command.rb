@@ -125,9 +125,6 @@ module Unity
         end
 
         # deploy on ECS cluster
-        unless configuration['aws_profile'].nil?
-          ENV['AWS_PROFILE'] ||= configuration['aws_profile']
-        end
         services_configuration.each do |service_configuration|
           # aws ecs update-service --cluster <cluster name> --service <service name> --force-new-deployment
           execute_and_wait_success :ecs_update_service, dry_run: options[:dry_run] do |cmd_args|
@@ -139,6 +136,10 @@ module Unity
             cmd_args << '--service'
             cmd_args << "#{ecs_name}_#{service_configuration.fetch('name')}"
             cmd_args << '--force-new-deployment'
+            unless configuration['aws_profile'].nil?
+              cmd_args << '--profile'
+              cmd_args << configuration['aws_profile']
+            end
           end
         end
       end
