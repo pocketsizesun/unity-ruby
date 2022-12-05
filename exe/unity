@@ -9,10 +9,6 @@ orig_args = ARGV.dup
 command = ARGV.shift
 
 case command
-when 'ecs'
-  require 'unity/cli/ecs_command'
-
-  Unity::CLI::EcsCommand.call(*ARGV.dup)
 when 'console', 'c'
   ENV['UNITY_CONSOLE'] = '1'
   require_relative "#{Dir.pwd}/config/boot.rb"
