@@ -70,14 +70,6 @@ module Unity
       @config ||= Unity::Configuration.new
     end
 
-    def routes
-      @routes
-    end
-
-    def logger
-      @logger
-    end
-
     def configure(&block)
       instance_eval(&block)
     end

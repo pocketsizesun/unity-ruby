@@ -89,10 +89,6 @@ module Unity
     # @return [Unity::Configuration]
     def config: () -> untyped
 
-    def routes: () -> untyped
-
-    def logger: () -> untyped
-
     def configure: () ?{ () -> untyped } -> untyped
 
     # @param name [String] An operation name
