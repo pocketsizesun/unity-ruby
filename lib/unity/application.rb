@@ -70,10 +70,6 @@ module Unity
       @config ||= Unity::Configuration.new
     end
 
-    def operations
-      @operations
-    end
-
     def routes
       @routes
     end

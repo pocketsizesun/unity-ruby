@@ -89,8 +89,6 @@ module Unity
     # @return [Unity::Configuration]
     def config: () -> untyped
 
-    def operations: () -> untyped
-
     def routes: () -> untyped
 
     def logger: () -> untyped
