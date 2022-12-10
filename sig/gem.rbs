@@ -1,0 +1,833 @@
+module Unity
+  # @param app_class [Class<Unity::Application>]
+  def self?.app_class=: (untyped klass) -> untyped
+
+  # @return [Class<Unity::Application>]
+  def self?.app_class: () -> untyped
+
+  # @return [Unity::Application]
+  def self?.application: () -> untyped
+
+  # @return [Unity::Application]
+  def self?.application=: (untyped inst) -> untyped
+
+  # @return [Logger]
+  def self?.logger: () -> untyped
+
+  def self?.logger=: (untyped arg) -> untyped
+
+  def self?.env=: (untyped arg) -> untyped
+
+  # @return [String]
+  def self?.env: () -> untyped
+
+  # @return [String]
+  def self?.environment: () -> untyped
+
+  def self?.environment=: (untyped arg) -> untyped
+
+  # @return [String]
+  def self?.root: () -> untyped
+
+  def self?.coordination: () -> untyped
+
+  def self?.report_exception: (?::String tag) { () -> untyped } -> untyped
+
+  def self?.gem_path: () -> untyped
+
+  def self?.load_tasks: () -> untyped
+
+  # @return [Integer]
+  def self?.current_timestamp: () -> untyped
+
+  # @return [Time]
+  def self?.current_time: () -> untyped
+
+  # @return [Integer]
+  def self?.concurrency: () -> untyped
+
+  # @param value [Integer]
+  def self?.concurrency=: (untyped value) -> untyped
+end
+
+module Unity
+  class Application
+    attr_reader booted_at: untyped
+
+    attr_reader operations: untyped
+
+    attr_reader routes: untyped
+
+    attr_accessor logger: untyped
+
+    def self.inherited: (untyped base) -> untyped
+
+    def self.config: () -> untyped
+
+    def self.operation: (untyped name, ?untyped? klass_name) ?{ () -> untyped } -> untyped
+
+    def self.app_name: () -> untyped
+
+    def self.app_name=: (untyped arg) -> untyped
+
+    def self.route: (untyped path, ?untyped? handler) ?{ () -> untyped } -> untyped
+
+    def self.configure: () ?{ () -> untyped } -> untyped
+
+    def self.config_for: (untyped name) -> untyped
+
+    def self.load!: () -> untyped
+
+    def initialize: () -> void
+
+    # @return [String]
+    def app_name: () -> untyped
+
+    # @param value [String] An application name
+    def app_name=: (untyped value) -> untyped
+
+    # @return [Unity::Configuration]
+    def config: () -> untyped
+
+    def operations: () -> untyped
+
+    def routes: () -> untyped
+
+    def logger: () -> untyped
+
+    def configure: () ?{ () -> untyped } -> untyped
+
+    # @param name [String] An operation name
+    # @return [Unity::Operation, NilClass]
+    def find_operation: (untyped name) -> untyped
+
+    # Add a route
+    # @param path [String]
+    # @param handler [Unity::RouteController, NilClass]
+    def route: (untyped path, ?untyped? handler) ?{ () -> untyped } -> untyped
+
+    # @return [Integer]
+    def uptime: () -> untyped
+
+    # Load a configuration from a YAML file located in "{app_root}/config/{name}.yml"
+    # @param name [String] A configuration file name (without the extension)
+    # @return [Object]
+    def config_for: (untyped name) -> untyped
+
+    def load_tasks: () -> untyped
+
+    # @param tag [String]
+    def silent: (?::String tag, ?on: ::Array[untyped]) { () -> untyped } -> untyped
+
+    # @param name [String] An operation name
+    # @param klass_name [Unity::Operation] An operation class
+    def operation: (untyped name, ?untyped? klass_name) ?{ () -> untyped } -> untyped
+
+    def load!: () -> untyped
+
+    def call: (untyped env) -> untyped
+  end
+end
+
+module Unity
+  module CLI
+  end
+end
+
+module Unity
+  module CLI
+    class Command
+      # @param args [Array<String>]
+      def self.call: (*untyped args) -> untyped
+
+      def initialize: () -> void
+
+      # @abstract
+      # @param args [Array<String>]
+      # @return [void]
+      def call: (*untyped args) -> nil
+    end
+  end
+end
+
+module Unity
+  class Configuration
+    def self.default_options: () -> { time_zone: "UTC", concurrency: untyped, log_level: untyped, middlewares: ::Array[untyped], logger: untyped }
+
+    def initialize: (?::Hash[untyped, untyped] options) -> void
+
+    def max_threads: () -> untyped
+
+    def max_threads=: (untyped arg) -> untyped
+
+    def []: (untyped key) -> untyped
+
+    def []=: (untyped key, untyped value) -> untyped
+
+    def set: (untyped key, untyped value) -> untyped
+
+    def get: (untyped key) -> untyped
+
+    def method_missing: (untyped method_name, *untyped args) ?{ () -> untyped } -> untyped
+
+    def respond_to_missing?: (untyped method_name, ?bool include_private) -> untyped
+  end
+end
+
+module Unity
+  class Coordination
+    DEFAULT_TTL: 86400
+
+    DEFAULT_LOCK_TTL: 60
+
+    DEFAULT_DATA_TTL: 3600
+
+    Error: untyped
+
+    LockError: untyped
+
+    WriteError: untyped
+
+    def initialize: (?namespace: untyped?, ?redlock: untyped?) -> void
+
+    def with_lock!: (untyped name, ?ttl: untyped) { (untyped) -> untyped } -> untyped
+
+    private
+
+    def current_time: () -> untyped
+
+    def lock_key_for: (untyped str) -> ::String
+
+    class LockData
+      DEFAULT_TTL: 3600
+
+      def initialize: (untyped redlock, untyped lock_info, untyped lock_name) -> void
+
+      def info: () -> untyped
+
+      def valid?: () -> untyped
+
+      def valid!: () -> (true | untyped)
+
+      def keys: () -> untyped
+
+      def to_h: () -> untyped
+
+      def key?: (untyped key) -> untyped
+
+      def []: (untyped key) -> untyped
+
+      def []=: (untyped key, untyped value) -> untyped
+
+      def set: (untyped key, untyped value, ?ttl: untyped, ?nx: bool) -> untyped
+
+      def delete: (untyped key) -> untyped
+
+      def ttl: () -> untyped
+
+      def incr: (untyped key, ?::Integer number) -> untyped
+
+      def touch!: (?ttl: untyped) -> untyped
+    end
+  end
+end
+
+module Unity
+  class Error < StandardError
+  end
+end
+
+module Unity
+  class Event
+    attr_reader id: untyped
+
+    attr_reader type: untyped
+
+    attr_reader date: untyped
+
+    attr_reader data: untyped
+
+    attr_reader replay_name: untyped
+
+    def self.from_event_bridge: (untyped item) -> untyped
+
+    def self.from_json: (untyped item) -> untyped
+
+    def initialize: (?::Hash[untyped, untyped] attributes) -> void
+
+    def []: (untyped key) -> untyped
+
+    def source: () -> untyped
+
+    def deduplication_id: () -> untyped
+
+    def content_sha256: () -> untyped
+
+    def replayed?: () -> untyped
+
+    def as_json: () -> ::Hash[::String, untyped]
+
+    def to_json: () -> untyped
+  end
+end
+
+module Unity
+  class EventEmitter
+    def initialize: (untyped source, ?event_bus_name: untyped?, **untyped kwargs) -> void
+
+    def parse: (untyped item) -> untyped
+
+    def publish: (untyped `type`, untyped data, ?untyped date) -> (true | untyped)
+
+    # @param events [Array<Unity::Event>] An array of {Unity::Event}
+    def put: (*untyped events) -> (true | untyped)
+
+    class Error < StandardError
+      def initialize: (untyped result) -> void
+    end
+  end
+end
+
+module Unity
+  class EventHandler
+    def self.call: (untyped event) -> untyped
+
+    def call: (untyped event) -> nil
+  end
+end
+
+module Unity
+  class EventProcessor
+    def self.registered_events: () -> untyped
+
+    def self.on: (untyped name, ?untyped? klass) ?{ () -> untyped } -> untyped
+
+    def initialize: (?debug_mode: bool) -> void
+
+    # process an Unity parsed event
+    # Example:
+    # processor = Unity::EventProcessor.new
+    # event = Unity::Event.parse(body)
+    # processor.call(event)
+    # @param event [Unity::Event] An Unity event object
+    # @return [Boolean]
+    def call: (untyped event) -> untyped
+  end
+end
+
+module Unity
+  class LocalCache
+    Entry: untyped
+
+    def initialize: () -> void
+
+    def clear: () -> untyped
+
+    def []: (untyped key) -> untyped
+
+    def fetch: (untyped key, **untyped kwargs) { () -> untyped } -> untyped
+
+    def get: (untyped key, ?untyped? default) -> untyped
+
+    def set: (untyped key, untyped value, ?ex: untyped?, ?exat: untyped?) -> true
+
+    def delete: (untyped key) -> untyped
+
+    private
+
+    def get_entry: (untyped key) -> (nil | untyped)
+  end
+end
+
+module Unity
+  class Middleware
+    def initialize: (untyped app, ?::Hash[untyped, untyped] _options) -> void
+
+    def call: (untyped env) -> untyped
+  end
+end
+
+module Unity
+  module Middlewares
+    class OperationExecutorMiddleware
+      OPERATION_NOT_FOUND_RESPONSE: "{\"error\":\"Operation not found\",\"data\":{}}"
+
+      SEND_JSON_HEADERS: ::Hash[::String, "application/json"]
+
+      RACK_INPUT_ENV: "rack.input"
+
+      OPERATION_NAME_ENV: "unity.operation_name"
+
+      OPERATION_CONTEXT_ENV: "unity.operation_context"
+
+      OPERATION_INPUT_ENV: "unity.operation_input"
+
+      def initialize: (untyped app) -> void
+
+      def call: (untyped env) -> untyped
+
+      private
+
+      def parse_request_body: (untyped value) -> untyped
+
+      def send_json: (untyped code, untyped data) -> ::Array[untyped | ::Array[untyped]]
+
+      def uncaught_exception: (untyped env, untyped exception) -> untyped
+    end
+  end
+end
+
+module Unity
+  module Middlewares
+    class RouterMiddleware
+      HEALTH_CHECK_RESPONSE: "{\"uptime\": %d, \"service\": \"%s\"}"
+
+      HEALTH_CHECK_PATH: "/_status"
+
+      OPERATION_EXECUTION_PATH: "/"
+
+      RACK_REQUEST_ENV: "rack.request"
+
+      OPERATION_NAME_ENV: "unity.operation_name"
+
+      OPERATION_CONTEXT_ENV: "unity.operation_context"
+
+      def initialize: (untyped app) -> void
+
+      def call: (untyped env) -> untyped
+
+      private
+
+      def health_check_response: () -> ::Array[200 | ::Hash[::String, "application/json"] | ::Array[untyped]]
+    end
+  end
+end
+
+module Unity
+  class Model
+    include ActiveModel::Model
+
+    include ActiveModel::Attributes
+
+    include ActiveModel::AttributeMethods
+
+    include ActiveModel::Dirty
+
+    include ActiveModel::Validations
+
+    include ActiveModel::Serialization
+
+    include ActiveModel::Serializers::JSON
+
+    # @return [ActiveModel::AttributeSet::Builder]
+    def self.attribute_builder: () -> untyped
+
+    # @param attributes [Hash<String, Object>]
+    # @return [self]
+    def self.init_with_attributes: (untyped attributes) -> untyped
+
+    # @param attributes [Hash<String, Object>]
+    # @return [self]
+    def initialize_with: (untyped attributes, ?bool new_record) -> self
+
+    # @return [self]
+    def self.build!: (*untyped args) -> untyped
+
+    # @return [self]
+    def self.build: (*untyped args) -> untyped
+
+    def assign_attributes_from_database: (untyped hash) -> untyped
+
+    def valid!: () -> (true | untyped)
+
+    class Error < StandardError
+    end
+
+    class ValidationError < Error
+      # @param model [Unity::Model]
+      attr_reader model: untyped
+
+      ERROR_MESSAGE: "`%s` %s"
+
+      # @param model [Unity::Model]
+      def initialize: (untyped model) -> void
+    end
+
+    class RecordNotUniqueError < Error
+      # @param model [Unity::Model]
+      attr_reader model: untyped
+
+      # @param model [Unity::Model]
+      def initialize: (untyped model) -> void
+    end
+  end
+end
+
+module Unity
+  class Model
+    class TagSetType < ActiveModel::Type::Value
+      def type: () -> :tagset
+
+      def cast: (untyped value) -> untyped
+
+      def changed?: (untyped old_value, untyped new_value, untyped _new_value_before_type_cast) -> untyped
+    end
+  end
+end
+
+module Unity
+  class Operation
+    attr_reader context: untyped
+
+    attr_reader args: untyped
+
+    OperationContext: untyped
+
+    Output: untyped
+
+    EmptyOutput: untyped
+
+    # @return [Class<Unity::OperationInput>]
+    attr_reader self.input_klass: untyped
+
+    # @param args [Hash<String, Object>]
+    # @param [Unity::OperationContext] context
+    # @return [Unity::OperationOutput]
+    def self.call: (untyped args, ?untyped? context) -> untyped
+
+    # @param klass [Class<Unity::OperationInput>]
+    # @return [void]
+    def self.with_input_klass: (untyped klass) -> untyped
+
+    # Alias of `with_input_klass`
+    # @param klass [Class<Unity::OperationInput>]
+    # @return [void]
+    def self.with_input: (untyped klass) -> untyped
+
+    # @param [Unity::OperationContext] context
+    def initialize: (?untyped? context) -> void
+
+    # @param args [Hash<String, Object>]
+    # @return [Unity::OperationOutput]
+    def call: (untyped args) -> untyped
+
+    class OperationError < Error
+      attr_reader code: untyped
+
+      attr_reader data: untyped
+
+      attr_reader trace_id: untyped
+
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data, ?::Integer code) -> void
+
+      def as_json: () -> ::Hash[::String, untyped]
+
+      def as_rack_response: () -> ::Array[untyped | ::Hash[::String, "application/json"] | ::Array[untyped]]
+    end
+
+    class ValidationError < OperationError
+    end
+
+    # HTTP Error Code: 401
+    class AuthenticationError < OperationError
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data) -> void
+    end
+
+    # HTTP Error Code: 403
+    class ForbiddenError < OperationError
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data) -> void
+    end
+
+    # HTTP Error Code: 404
+    class ResourceNotFoundError < OperationError
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data) -> void
+    end
+
+    # HTTP Error Code: 409
+    class ConflictError < OperationError
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data) -> void
+    end
+
+    # HTTP Error Code: 500
+    class ServerError < OperationError
+      def initialize: (untyped message, ?::Hash[untyped, untyped] data) -> void
+    end
+  end
+end
+
+module Unity
+  class OperationContext
+    # @param data [Hash<String, Object>]
+    def initialize: (?::Hash[untyped, untyped] data) -> void
+
+    # @param key [String]
+    # @param value
+    def []=: (untyped key, untyped value) -> untyped
+
+    # @param key [String]
+    # @return A value
+    def []: (untyped key) -> untyped
+
+    # @param key [String]
+    # @param value
+    def set: (untyped key, untyped value) -> untyped
+
+    def each: () ?{ () -> untyped } -> untyped
+
+    def keys: () -> untyped
+
+    def as_json: () -> untyped
+
+    def to_json: () -> untyped
+  end
+end
+
+module Unity
+  class OperationInput
+    include ActiveModel::Model
+
+    include ActiveModel::Attributes
+
+    include ActiveModel::AttributeMethods
+
+    include ActiveModel::Validations
+
+    include ActiveModel::Serialization
+
+    include ActiveModel::Serializers::JSON
+
+    ERROR_MESSAGE: "`%s` %s"
+
+    def self.model_name: () -> untyped
+
+    def self.model_name=: (untyped arg) -> untyped
+
+    # @param hash [Hash<String, Object>]
+    # @return [self]
+    def self.load: (untyped hash) -> untyped
+
+    def self.shape: (untyped name) ?{ () -> untyped } -> untyped
+
+    def require: (untyped attr_name) -> untyped
+
+    class ShapeType < ActiveModel::Type::Value
+      def initialize: (untyped shape_klass) -> void
+
+      def cast: (untyped value) -> untyped
+
+      def deserialize: (untyped value) -> untyped
+    end
+  end
+end
+
+module Unity
+  class OperationOutput
+    attr_accessor code: untyped
+
+    def initialize: (?::Hash[untyped, untyped] data, ?untyped? code) -> void
+
+    def []: (untyped key) -> untyped
+
+    def []=: (untyped key, untyped value) -> untyped
+
+    def empty?: () -> untyped
+
+    def as_json: () -> untyped
+
+    def as_rack_response: () -> ::Array[untyped | ::Hash[::String, "application/json"] | ::Array[untyped]]
+  end
+end
+
+module Unity
+  class RecordHandler
+    include Singleton
+
+    def self.call: (untyped event) -> untyped
+
+    def call: (untyped event) -> untyped
+  end
+end
+
+module Unity
+  class Route
+    attr_reader path: untyped
+
+    attr_reader handler: untyped
+
+    def initialize: (untyped path, untyped handler) -> void
+
+    def call: (untyped request) -> untyped
+
+    def match?: (untyped tested_path) -> untyped
+  end
+end
+
+module Unity
+  class RouteController
+    def self.call: (untyped request) -> untyped
+
+    # @param request [Rack::Request] A Rack request object
+    # @return [Rack::Response]
+    def call: (untyped request) -> untyped
+
+    private
+
+    def respond_with_text: (untyped text, ?status: ::Integer, ?headers: ::Hash[untyped, untyped]) -> ::Array[untyped | ::Array[untyped]]
+
+    def respond_with_json: (untyped data, ?status: ::Integer, ?headers: ::Hash[untyped, untyped]) -> ::Array[untyped | ::Array[untyped]]
+
+    def head: (untyped status) -> ::Array[untyped | ::Hash[untyped, untyped] | ::Array[untyped]]
+  end
+end
+
+module Unity
+  class TagSet < Hash
+    def []=: (untyped key, untyped value) -> (nil | untyped)
+
+    def to_sha256: (?hex: bool) -> untyped
+
+    def to_sha1: (?hex: bool) -> untyped
+
+    private
+
+    def sha1: () -> untyped
+
+    def sha2: () -> untyped
+  end
+end
+
+module Unity
+  # Date-relative UUID generation.
+  class TimeId
+    NUM_RANDOM_BITS: 23
+
+    # Generates a time-sortable, 64-bit UUID.
+    #
+    # @example
+    #   Druuid.gen
+    #   # => 11142943683383068069
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    def self.random: () -> untyped
+
+    def self.from: (untyped time) -> untyped
+
+    # Determines when a given UUID was generated.
+    #
+    # @param [Numeric] uuid
+    # @param [Numeric] epoch offset
+    # @return [Time] when UUID was generated
+    # @example
+    #   Druuid.time 11142943683383068069
+    #   # => 2012-02-04 00:00:00 -0800
+    def self.time: (untyped id) -> untyped
+
+    def self.date_as_string: (untyped id) -> untyped
+
+    # Determines the minimum UUID that could be generated for the given time.
+    #
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    # @example
+    #   Druuid.min_for_time
+    #   # => 11142943683379200000
+    def self.min_for_time: (?untyped time) -> untyped
+
+    def self.min: (?untyped time) -> untyped
+
+    # Determines the maximum UUID that could be generated for the given time.
+    #
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    def self.max_for_time: (?untyped time) -> untyped
+
+    def self.range: (untyped from, untyped to) -> ::Range[untyped]
+  end
+end
+
+module Unity
+  # Date-relative UUID generation.
+  class TimeUuid
+    NUM_RANDOM_BITS: 32
+
+    # Generates a time-sortable, 64-bit UUID.
+    #
+    # @example
+    #   Druuid.gen
+    #   # => 11142943683383068069
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    def self.random: () -> untyped
+
+    def self.from: (untyped time) -> untyped
+
+    # Determines when a given UUID was generated.
+    #
+    # @param [Numeric] uuid
+    # @param [Numeric] epoch offset
+    # @return [Time] when UUID was generated
+    # @example
+    #   Druuid.time 11142943683383068069
+    #   # => 2012-02-04 00:00:00 -0800
+    def self.time: (untyped id) -> untyped
+
+    def self.date_as_string: (untyped id) -> untyped
+
+    # Determines the minimum UUID that could be generated for the given time.
+    #
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    # @example
+    #   Druuid.min_for_time
+    #   # => 11142943683379200000
+    def self.min_for_time: (?untyped time) -> untyped
+
+    def self.min: (?untyped time) -> untyped
+
+    # Determines the maximum UUID that could be generated for the given time.
+    #
+    # @param [Time] time of UUID
+    # @param [Numeric] epoch offset
+    # @return [Bignum] UUID
+    def self.max_for_time: (?untyped time) -> untyped
+
+    def self.range: (untyped from, untyped to) -> ::Range[untyped]
+  end
+end
+
+module Unity
+  module Utils
+    class TimeParser
+      def self.parse: (untyped arg) -> untyped
+
+      def self.round: (untyped time, untyped interval) -> untyped
+    end
+  end
+end
+
+module Unity
+  module Utils
+    class TimeRange
+      def self.generate: (untyped from, untyped to, untyped interval) -> untyped
+
+      def initialize: (untyped from, untyped to, untyped interval) -> void
+
+      def to_h: () -> untyped
+
+      private
+
+      def next_time: (untyped time) -> untyped
+
+      def key_for: (untyped time) -> untyped
+    end
+  end
+end
+
+module Unity
+  VERSION: "2.0.0"
+end
