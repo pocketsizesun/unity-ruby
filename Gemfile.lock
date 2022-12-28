@@ -1,9 +1,3 @@
-GIT
-  remote: git@github.com:pocketsizesun/unity-logger-ruby.git
-  revision: ef2e7b188b75ca7027aa642a7b3365a8aef26cdd
-  specs:
-    unity-logger (1.0.1)
-
 PATH
   remote: .
   specs:
@@ -169,7 +163,6 @@ DEPENDENCIES
   rubocop
   solargraph
   unity!
-  unity-logger!
   yard
 
 BUNDLED WITH

@@ -168,12 +168,13 @@ module Unity
           @operations = {}
           @zeitwerk.reload
           @zeitwerk.eager_load
-          puts(modified: modified, added: added, removed: removed)
+          @logger&.debug "modified files: #{modified.join(', ')}"
+          @logger&.debug "added files: #{added.join(', ')}"
+          @logger&.debug "removed files: #{removed.join(', ')}"
         end
 
         listener.start
 
-        @zeitwerk.log!
         @zeitwerk.enable_reloading
         @logger&.warn 'Code reloading enabled'
       end
@@ -183,14 +184,6 @@ module Unity
 
     def call(env)
       @router_middleware.call(env)
-    rescue JSON::ParserError => e
-      [
-        500,
-        { 'content-type' => 'application/json' },
-        [
-          { 'error' => "JSON parser error: #{e.message}" }.to_json
-        ]
-      ]
     end
   end
 end

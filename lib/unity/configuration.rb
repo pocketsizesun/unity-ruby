@@ -31,9 +31,9 @@ module Unity
     def initialize
       @time_zone = 'UTC'
       @concurrency = ENV.fetch('CONCURRENCY', DEFAULT_CONCURRENCY).to_i
-      @log_level = Logger::INFO
+      @log_level = ::Logger::INFO
       @middlewares = []
-      @logger = Logger.new(STDOUT)
+      @logger = ::Logger.new($stdout)
       @autoload_paths = []
       @eager_load = true
       @custom_values = {}

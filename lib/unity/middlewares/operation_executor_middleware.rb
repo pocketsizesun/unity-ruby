@@ -10,6 +10,7 @@ module Unity
       OPERATION_CONTEXT_ENV = 'unity.operation_context'
       OPERATION_INPUT_ENV = 'unity.operation_input'
       EMPTY_ARRAY = [].freeze
+      EMPTY_HASH = {}.freeze
 
       # @param app [Unity::Application]
       def initialize(app)
@@ -45,6 +46,14 @@ module Unity
         else
           [204, {}, EMPTY_ARRAY]
         end
+      rescue JSON::ParserError => e
+        [
+          500,
+          { 'content-type' => 'application/json' },
+          [
+            { 'error' => "JSON parser error: #{e.message}" }.to_json
+          ]
+        ]
       rescue Unity::Model::RecordNotUniqueError => e
         [409, SEND_JSON_HEADERS.dup, [JSON.fast_generate({ 'error' => e.message })]]
       rescue Unity::Operation::OperationError => e
@@ -56,9 +65,9 @@ module Unity
       private
 
       def parse_request_body(value)
+        return EMPTY_HASH if value.nil? || value.empty?
+
         JSON.parse(value)
-      rescue JSON::ParserError
-        {}
       end
 
       def send_json(code, data)
