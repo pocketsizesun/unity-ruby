@@ -2,15 +2,23 @@
 
 module Unity
   class Operation
-    attr_reader :context, :args
+    # @return [Unity::OperationContext]
+    attr_reader :context
 
     OperationContext = Class.new(Hash)
     Output = ::Unity::OperationOutput
-    EmptyOutput = Class.new(::Unity::OperationOutput) do
-      def initialize(code = 204)
-        super(nil, code)
-      end
+    EmptyOutput = ::Unity::OperationOutput.new(nil, 204).freeze
+
+    # @param base [Class]
+    # @return [void]
+    def self.inherited(base)
+      super
+      operation_name = base.name.to_s.split('::').last
+      Unity.application.operation(
+        operation_name.slice(0, operation_name.length - 9), base
+      )
     end
+
 
     class << self
       # @return [Class<Unity::OperationInput>]
@@ -18,7 +26,7 @@ module Unity
     end
 
     # @param args [Hash<String, Object>]
-    # @param [Unity::OperationContext] context
+    # @param context [Unity::OperationContext, nil]
     # @return [Unity::OperationOutput]
     def self.call(args, context = nil)
       new(context).call(args)
@@ -37,8 +45,9 @@ module Unity
       @input_klass = klass
     end
 
-    # @param [Unity::OperationContext] context
+    # @param [Unity::OperationContext, nil] context
     def initialize(context = nil)
+      # @type [Unity::OperationContext]
       @context = \
         if context.is_a?(Unity::OperationContext)
           context
@@ -47,6 +56,7 @@ module Unity
         end
     end
 
+    # @sg-ignore
     # @param args [Hash<String, Object>]
     # @return [Unity::OperationOutput]
     def call(args)
@@ -54,8 +64,18 @@ module Unity
     end
 
     class OperationError < Error
-      attr_reader :code, :data, :trace_id
+      # @return [Integer]
+      attr_reader :code
 
+      # @return [Hash{String => Object}]
+      attr_reader :data
+
+      # @return [String]
+      attr_reader :trace_id
+
+      # @param message [String]
+      # @param data [Hash{String => Object}]
+      # @param code [Integer]
       def initialize(message, data = {}, code = 400)
         super(message)
 
@@ -63,10 +83,12 @@ module Unity
         @code = code
       end
 
+      # @return [Hash{String => Object}]
       def as_json
         { 'error' => message, 'data' => data }
       end
 
+      # @return [Array<Integer, Hash, Array<String>>]
       def as_rack_response
         [code, { 'content-type' => 'application/json' }, [JSON.fast_generate(as_json)]]
       end

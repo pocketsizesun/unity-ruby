@@ -33,7 +33,7 @@ module Unity
       )
     end
 
-    # @param attributes [Hash<String, Object>]
+    # @param attributes [Hash{String => Object}]
     # @return [self]
     def self.init_with_attributes(attributes)
       allocate.initialize_with(attributes, false)

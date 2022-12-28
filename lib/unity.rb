@@ -17,14 +17,14 @@ require 'connection_pool'
 require 'rack'
 require 'rack/builder'
 require 'active_model'
+require 'zeitwerk'
+
 require 'unity/version'
 require 'unity/configuration'
 require 'unity/error'
 require 'unity/time_id'
-require 'unity/time_uuid'
 require 'unity/model'
 require 'unity/application'
-require 'unity/coordination'
 require 'unity/event'
 require 'unity/event_handler'
 require 'unity/route'
@@ -34,14 +34,11 @@ require 'unity/middlewares/operation_executor_middleware'
 require 'unity/middlewares/router_middleware'
 require 'unity/operation_input'
 require 'unity/operation_output'
-require 'unity/operation'
 require 'unity/operation_context'
-require 'unity/record_handler'
+require 'unity/operation'
 
 # model
 require_relative 'unity/tag_set'
-require_relative 'unity/model/tag_set_type'
-ActiveModel::Type.register(:tagset, Unity::Model::TagSetType)
 
 # utils
 require 'unity/utils/time_parser'
@@ -52,22 +49,15 @@ Encoding.default_external = Encoding::UTF_8
 module Unity
   module_function
 
-  # @param app_class [Class<Unity::Application>]
-  def app_class=(klass)
-    @app_class = klass
-  end
-
-  # @return [Class<Unity::Application>]
-  def app_class
-    @app_class
-  end
-
+  # @sg-ignore
   # @return [Unity::Application]
   def application
     @application
   end
 
-  # @return [Unity::Application]
+  # @sg-ignore
+  # @param inst [Unity::Application]
+  # @return [void]
   def application=(inst)
     @application = inst
   end
@@ -77,14 +67,19 @@ module Unity
     application.logger
   end
 
+  # @param arg [Logger, nil]
+  # @return [void]
   def logger=(arg)
     application.logger = arg
   end
 
+  # @param arg [String]
+  # @return [void]
   def env=(arg)
     @env = arg.to_s
   end
 
+  # @sg-ignore
   # @return [String]
   def env
     @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
@@ -95,19 +90,20 @@ module Unity
     env
   end
 
+  # @param arg [String]
+  # @return [void]
   def environment=(arg)
     self.env = arg
   end
 
+  # @sg-ignore
   # @return [String]
   def root
     @root ||= Dir.pwd
   end
 
-  def coordination
-    @coordination ||= Unity::Coordination.new
-  end
-
+  # @param tag [String]
+  # @return [void]
   def report_exception(tag = '@', &_block)
     yield
   rescue Exception => e # rubocop:disable Lint/RescueException
@@ -119,10 +115,13 @@ module Unity
     raise e
   end
 
+  # @sg-ignore
+  # @return [String]
   def gem_path
     @gem_path ||= File.realpath(File.dirname(__FILE__) + '/../')
   end
 
+  # @return [void]
   def load_tasks
     Dir.glob("#{gem_path}/lib/tasks/{*,*/**}.rake").each do |filename|
       load filename
@@ -140,13 +139,22 @@ module Unity
     Time.at(Process.clock_gettime(Process::CLOCK_REALTIME, :second).to_i)
   end
 
+  # @sg-ignore
   # @return [Integer]
   def concurrency
     @concurrency ||= ENV.fetch('CONCURRENCY', 4).to_i
   end
 
+  # @sg-ignore
   # @param value [Integer]
+  # @return [void]
   def concurrency=(value)
     @concurrency = value.to_i
+  end
+
+  # @param timeout [Integer]
+  # @return [ConnectionPool]
+  def build_connection_pool(timeout: 5, &block)
+    ConnectionPool.new(size: concurrency, timeout: timeout, &block)
   end
 end

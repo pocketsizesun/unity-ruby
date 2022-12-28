@@ -11,6 +11,8 @@ require:
 - yaml
 - json
 - optparse
+- zeitwerk
+- activemodel
 domains: []
 reporters:
 - rubocop

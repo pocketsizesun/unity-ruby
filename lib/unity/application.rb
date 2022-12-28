@@ -6,48 +6,38 @@ module Unity
     attr_accessor :logger
 
     def self.inherited(base)
+      unless Unity.application.nil?
+        raise RuntimeError, 'Only one Application is allowed'
+      end
+
       inst = base.new
       base.instance_variable_set(:@instance, inst)
-      Unity.app_class ||= base
-      Unity.application ||= inst
+      Unity.application = inst
     end
 
-    def self.config
-      @instance.config
+    # @sg-ignore
+    # @return [self]
+    def self.instance
+      @instance
     end
 
-    def self.operation(name, klass_name = nil, &block)
-      @instance.operation(name, klass_name, &block)
+    # @sg-ignore
+    # @return [void]
+    def self.method_missing(method_name, *args, **kwargs, &block)
+      instance.__send__(method_name, *args, **kwargs, &block)
     end
 
-    def self.app_name
-      @instance.app_name
-    end
-
-    def self.app_name=(arg)
-      @instance.app_name = arg
-    end
-
-    def self.route(path, handler = nil, &block)
-      @instance.route(path, handler, &block)
-    end
-
-    def self.configure(&block)
-      @instance.configure(&block)
-    end
-
-    def self.config_for(name)
-      @instance.config_for(name)
-    end
-
-    def self.load!
-      @instance.load!
+    # @param method_name [String]
+    # @param include_private [Boolean]
+    # @return [Boolean]
+    def self.respond_to_missing?(method_name, include_private = false)
+      instance.respond_to_missing?(method_name, include_private)
     end
 
     def initialize
       @app_name = self.class.to_s
       @operations = {}
-      @logger = ::Logger.new(STDOUT)
+      @logger = ::Logger.new($stdout)
       @operations = {}
       @booted_at = Unity.current_timestamp
       @file_configurations = {}
@@ -61,6 +51,7 @@ module Unity
     end
 
     # @param value [String] An application name
+    # @return [void]
     def app_name=(value)
       @app_name = value
     end
@@ -70,8 +61,10 @@ module Unity
       @config ||= Unity::Configuration.new
     end
 
+    # @yieldparam [Unity::Configuration]
+    # @return [void]
     def configure(&block)
-      instance_eval(&block)
+      @config.instance_eval(&block)
     end
 
     # @param name [String] An operation name
@@ -153,6 +146,39 @@ module Unity
         Unity.logger&.debug "load initializer file: #{file}"
         require "#{Unity.root}/config/initializers/#{file}"
       end
+
+      # configure zeitwerk
+      @zeitwerk = Zeitwerk::Loader.new
+      @zeitwerk.push_dir('lib') if File.directory?('lib')
+      Dir.glob("#{Dir.pwd}/app/*").each do |dir|
+        next unless File.directory?(dir)
+
+        @zeitwerk.push_dir(dir)
+        @logger&.debug("add autoload dir: #{dir}")
+      end
+      config.autoload_paths.each do |path|
+        @zeitwerk.push_dir(path)
+
+        @logger&.debug("add autoload dir: #{path}")
+      end
+      unless config.cache_code?
+        require 'listen'
+
+        listener = Listen.to(Dir.pwd) do |modified, added, removed|
+          @operations = {}
+          @zeitwerk.reload
+          @zeitwerk.eager_load
+          puts(modified: modified, added: added, removed: removed)
+        end
+
+        listener.start
+
+        @zeitwerk.log!
+        @zeitwerk.enable_reloading
+        @logger&.warn 'Code reloading enabled'
+      end
+      @zeitwerk.setup
+      @zeitwerk.eager_load if config.eager_load?
     end
 
     def call(env)

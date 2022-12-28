@@ -9,8 +9,11 @@ module Unity
       OPERATION_NAME_ENV = 'unity.operation_name'
       OPERATION_CONTEXT_ENV = 'unity.operation_context'
       OPERATION_INPUT_ENV = 'unity.operation_input'
+      EMPTY_ARRAY = [].freeze
 
+      # @param app [Unity::Application]
       def initialize(app)
+        # @type [Unity::Application]
         @app = app
       end
 
@@ -37,7 +40,11 @@ module Unity
           end
         )
 
-        result.as_rack_response
+        if !result.nil?
+          result.as_rack_response
+        else
+          [204, {}, EMPTY_ARRAY]
+        end
       rescue Unity::Model::RecordNotUniqueError => e
         [409, SEND_JSON_HEADERS.dup, [JSON.fast_generate({ 'error' => e.message })]]
       rescue Unity::Operation::OperationError => e
@@ -71,7 +78,7 @@ module Unity
           'backtrace' => exception.backtrace
         )
 
-        if @app.config.report_exception == true
+        if @app.config.report_exception?
           [
             500,
             SEND_JSON_HEADERS.dup,

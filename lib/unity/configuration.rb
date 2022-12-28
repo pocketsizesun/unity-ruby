@@ -2,55 +2,77 @@
 
 module Unity
   class Configuration
-    def self.default_options
-      {
-        time_zone: 'UTC',
-        concurrency: ENV.fetch('CONCURRENCY', 4).to_i,
-        log_level: Logger::INFO,
-        middlewares: [],
-        logger: Logger.new(STDOUT)
-      }
+    DEFAULT_CONCURRENCY = 4
+
+    # @return [String]
+    attr_accessor :time_zone
+
+    # @return [Integer]
+    attr_accessor :concurrency
+
+    # @return [Integer]
+    attr_accessor :log_level
+
+    # @return [Array<String>]
+    attr_accessor :middlewares
+
+    # @return [Logger]
+    attr_accessor :logger
+
+    # @return [Array<String>]
+    attr_accessor :autoload_paths
+
+    # @return [Boolean]
+    attr_accessor :cache_code
+
+    # @return [Hash{String => Object}]
+    attr_accessor :custom_values
+
+    def initialize
+      @time_zone = 'UTC'
+      @concurrency = ENV.fetch('CONCURRENCY', DEFAULT_CONCURRENCY).to_i
+      @log_level = Logger::INFO
+      @middlewares = []
+      @logger = Logger.new(STDOUT)
+      @autoload_paths = []
+      @eager_load = true
+      @custom_values = {}
+      @report_exception = true
+      @cache_code = true
     end
 
-    def initialize(options = {})
-      @options = self.class.default_options.merge(options)
-    end
-
+    # @return [Integer]
     def max_threads
       concurrency
     end
 
+    # @param arg [Integer]
+    # @return [void]
     def max_threads=(arg)
-      self[:concurrency] = arg.to_i
+      @concurrency = arg.to_i
     end
 
-    def [](key)
-      @options[key.to_sym]
+    # @return [Boolean]
+    def eager_load?
+      @eager_load == true
     end
 
-    def []=(key, value)
-      @options[key.to_sym] = value
+    # @return [Boolean]
+    def report_exception?
+      @report_exception == true
+    end
+
+    # @return [Boolean]
+    def cache_code?
+      @cache_code == true
     end
 
     def set(key, value)
-      @options[key.to_sym] = value
+      @custom_values[key.to_sym] = value
     end
 
     def get(key)
-      @options[key.to_sym]
-    end
-
-    def method_missing(method_name, *args, &block)
-      method_name_str = method_name.to_s
-      if method_name_str.include?('=')
-        self[method_name_str.slice(0, method_name_str.length - 1)] = args.first
-      else
-        @options[method_name]
-      end
-    end
-
-    def respond_to_missing?(method_name, include_private = false)
-      @options.key?(method_name)
+      @custom_values[key.to_sym]
     end
   end
 end

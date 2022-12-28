@@ -10,6 +10,7 @@ module Unity
       OPERATION_NAME_ENV = 'unity.operation_name'
       OPERATION_CONTEXT_ENV = 'unity.operation_context'
 
+      # @param app [Unity::Application]
       def initialize(app)
         @app = app
         @operation_executor = Unity::Middlewares::OperationExecutorMiddleware.new(app)
@@ -39,6 +40,7 @@ module Unity
 
       private
 
+      # @return [Array<Integer, Hash, Array<String>>]
       def health_check_response
         [
           200,

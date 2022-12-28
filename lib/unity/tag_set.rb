@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'model/tag_set_type'
+ActiveModel::Type.register(:tagset, Unity::Model::TagSetType)
+
 module Unity
   class TagSet < Hash
     def []=(key, value)
