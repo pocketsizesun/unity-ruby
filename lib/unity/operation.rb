@@ -69,5 +69,11 @@ module Unity
         super(400, message, data)
       end
     end
+
+    class InternalServerError < Error
+      def initialize(message, data = {})
+        super(500, message, data)
+      end
+    end
   end
 end
