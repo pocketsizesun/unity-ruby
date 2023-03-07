@@ -17,13 +17,8 @@ module Unity
           { 'content-type' => 'application/json' },
           [operation.call(env['unity.operation_input']).to_json]
         ]
-      rescue Unity::Operation::OperationError => e
-        Unity.logger&.error(
-          'message' => e.message,
-          'data' => e.data,
-          'operation_input' => env['unity.operation_input']
-        )
-        [400, { 'content-type' => 'application/json' }, [Oj.dump(e.as_json, mode: :compat)]]
+      rescue Unity::Operation::Error => e
+        [e.code, { 'content-type' => 'application/json' }, [Oj.dump(e.as_json, mode: :compat)]]
       rescue => e
         exception_id = Unity::TimeId.random
 
