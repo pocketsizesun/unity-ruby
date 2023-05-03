@@ -20,7 +20,7 @@ module Unity
     # @param klass [Class]
     # @return [void]
     def register(type, klass = nil, &block)
-      @dependencies[type] = klass || block
+      @dependencies[type] = klass&.new || block.call
     end
 
     # @!macro
