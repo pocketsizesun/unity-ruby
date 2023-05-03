@@ -16,14 +16,14 @@ module Unity
       @dependencies.each(&block)
     end
 
-    # @param name [String]
+    # @param name [Symbol]
     # @param klass [Class]
     # @return [void]
     def register(name, klass = nil, &block)
       @dependencies[name] = klass&.new || block.call
     end
 
-    # @param type [Object]
+    # @param name [Symbol]
     # @return [Object]
     def use(name)
       @dependencies[name]
