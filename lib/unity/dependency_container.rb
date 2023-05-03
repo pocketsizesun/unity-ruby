@@ -19,16 +19,14 @@ module Unity
     # @param name [String]
     # @param klass [Class]
     # @return [void]
-    def register(type, klass = nil, &block)
-      @dependencies[type] = klass&.new || block.call
+    def register(name, klass = nil, &block)
+      @dependencies[name] = klass&.new || block.call
     end
 
-    # @!macro
-    #   @param type [Object]
-    #   @param _ [Object]
-    #   @return [$2]
-    def use(type, _ = nil)
-      @dependencies[type]
+    # @param type [Object]
+    # @return [Object]
+    def use(name)
+      @dependencies[name]
     end
   end
 end

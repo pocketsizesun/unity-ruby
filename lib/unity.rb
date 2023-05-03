@@ -163,7 +163,11 @@ module Unity
   end
 
   # @return [Unity::DependencyContainer]
-  def di
-    @dependency_container
+  def di(name = nil)
+    if !name.nil?
+      @dependency_container.use(name)
+    else
+      @dependency_container
+    end
   end
 end
