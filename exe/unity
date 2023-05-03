@@ -15,7 +15,7 @@ when 'console', 'c'
   require 'pry'
 
   def reload!
-    exec '/usr/bin/env', 'bundle', 'exec', 'unity', 'console'
+    Unity.application.zeitwerk.reload
   end
 
   Pry.start

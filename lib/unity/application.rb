@@ -2,7 +2,7 @@
 
 module Unity
   class Application
-    attr_reader   :booted_at, :operations, :routes
+    attr_reader   :booted_at, :operations, :routes, :zeitwerk
     attr_accessor :logger
 
     def self.inherited(base)
@@ -43,7 +43,7 @@ module Unity
       @file_configurations = {}
       @routes = []
       @router_middleware = Unity::Middlewares::RouterMiddleware.new(self)
-      @configure_cb = nil
+      @configure_callbacks = []
     end
 
     # @return [String]
@@ -65,7 +65,7 @@ module Unity
     # @yieldparam [Unity::Configuration]
     # @return [void]
     def configure(&block)
-      @configure_cb = block
+      @configure_callbacks << block
     end
 
     # @param name [String] An operation name
@@ -134,7 +134,12 @@ module Unity
       # load specific environment config
       env_config_file = Unity.root + "/config/environments/#{Unity.env}.rb"
       if File.exist?(env_config_file)
-        load env_config_file
+        load(env_config_file)
+      end
+
+      # execute configure callbacks
+      @configure_callbacks.each do |callback|
+        instance_exec(&callback)
       end
 
       # configure logger
@@ -169,9 +174,6 @@ module Unity
           @operations = {}
           @zeitwerk.reload
           @zeitwerk.eager_load
-          @logger&.debug "modified files: #{modified.join(', ')}"
-          @logger&.debug "added files: #{added.join(', ')}"
-          @logger&.debug "removed files: #{removed.join(', ')}"
         end
 
         listener.start
@@ -181,8 +183,6 @@ module Unity
       end
       @zeitwerk.setup
       @zeitwerk.eager_load if config.eager_load?
-
-      instance_exec(&@configure_cb) unless @configure_cb.nil?
     end
 
     def call(env)

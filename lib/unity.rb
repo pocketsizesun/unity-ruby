@@ -18,6 +18,7 @@ require 'rack'
 require 'rack/builder'
 require 'active_model'
 require 'zeitwerk'
+require 'unity-logger'
 
 require 'unity/version'
 require 'unity/configuration'
@@ -36,6 +37,7 @@ require 'unity/operation_input'
 require 'unity/operation_output'
 require 'unity/operation_context'
 require 'unity/operation'
+require 'unity/dependency_container'
 
 # model
 require_relative 'unity/tag_set'
@@ -47,6 +49,8 @@ Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
 
 module Unity
+  @dependency_container = ::Unity::DependencyContainer.new
+
   module_function
 
   # @sg-ignore
@@ -156,5 +160,10 @@ module Unity
   # @return [ConnectionPool]
   def build_connection_pool(timeout: 5, &block)
     ConnectionPool.new(size: concurrency, timeout: timeout, &block)
+  end
+
+  # @return [Unity::DependencyContainer]
+  def di
+    @dependency_container
   end
 end
