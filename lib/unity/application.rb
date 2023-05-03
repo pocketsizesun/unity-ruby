@@ -43,6 +43,7 @@ module Unity
       @file_configurations = {}
       @routes = []
       @router_middleware = Unity::Middlewares::RouterMiddleware.new(self)
+      @configure_cb = nil
     end
 
     # @return [String]
@@ -64,7 +65,7 @@ module Unity
     # @yieldparam [Unity::Configuration]
     # @return [void]
     def configure(&block)
-      @config.instance_eval(&block)
+      @configure_cb = block
     end
 
     # @param name [String] An operation name
@@ -180,6 +181,8 @@ module Unity
       end
       @zeitwerk.setup
       @zeitwerk.eager_load if config.eager_load?
+
+      instance_exec(&@configure_cb) unless @configure_cb.nil?
     end
 
     def call(env)
