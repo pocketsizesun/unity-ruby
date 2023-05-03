@@ -146,13 +146,6 @@ module Unity
       @logger = config.logger unless config.logger.nil?
       @logger&.level = config.log_level
 
-      # run initializers
-      Dir.glob("#{Unity.root}/config/initializers/*.rb").each do |item|
-        file = File.basename(item)
-        Unity.logger&.debug "load initializer file: #{file}"
-        require "#{Unity.root}/config/initializers/#{file}"
-      end
-
       # configure zeitwerk
       @zeitwerk = Zeitwerk::Loader.new
       @zeitwerk.push_dir('lib') if File.directory?('lib')
@@ -183,6 +176,13 @@ module Unity
       end
       @zeitwerk.setup
       @zeitwerk.eager_load if config.eager_load?
+
+      # run initializers
+      Dir.glob("#{Unity.root}/config/initializers/*.rb").each do |item|
+        file = File.basename(item)
+        Unity.logger&.debug "load initializer file: #{file}"
+        require "#{Unity.root}/config/initializers/#{file}"
+      end
     end
 
     def call(env)
