@@ -29,7 +29,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activemodel', '> 6'
   spec.add_dependency 'concurrent-ruby', '~> 1.1'
-  spec.add_dependency 'http', '~> 5.1'
   spec.add_dependency 'connection_pool', '~> 2.2'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'dotenv', '~> 2.7'
