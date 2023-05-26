@@ -12,7 +12,6 @@ require 'yaml'
 
 # 3rd party libs
 require 'dotenv/load'
-require 'http'
 require 'connection_pool'
 require 'rack'
 require 'rack/builder'
