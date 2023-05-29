@@ -12,6 +12,14 @@ module Unity
       @handlers[type] << klass || block
     end
 
+    def handlers_for(type)
+      @handlers[type]
+    end
+
+    def handler_types
+      @handlers.keys
+    end
+
     def call(event)
       return false if @handlers[event.type].nil?
 
