@@ -13,11 +13,13 @@ module Unity
     end
 
     def call(event)
-      return if @handlers[event.type].nil?
+      return false if @handlers[event.type].nil?
 
       @handlers[event.type].each do |handler|
         handler.call(event)
       end
+
+      true
     end
   end
 end
