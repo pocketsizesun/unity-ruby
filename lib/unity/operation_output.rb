@@ -25,6 +25,10 @@ module Unity
       @data&.as_json
     end
 
+    def fetch(key, default = nil)
+      @data.fetch(key.to_s, default)
+    end
+
     def as_rack_response
       if !@data.nil? && !@data.empty?
         [
