@@ -86,7 +86,7 @@ module Unity
   # @sg-ignore
   # @return [String]
   def env
-    @env ||= ENV['APP_ENV'] || ENV.fetch('UNITY_ENV', 'development')
+    @env ||= ENV['UNITY_ENV'] || ENV['APP_ENV'] || ENV['RACK_ENV'] || 'development'
   end
 
   # @return [String]
