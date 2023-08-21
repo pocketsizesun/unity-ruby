@@ -3,7 +3,7 @@
 module Unity
   module Middlewares
     class RouterMiddleware
-      HEALTH_CHECK_RESPONSE = '{"uptime": %d, "service": "%s"}'
+      HEALTH_CHECK_RESPONSE = '{"state": "UP", "uptime": %d}'
       HEALTH_CHECK_PATH = '/_status'
       OPERATION_EXECUTION_PATH = '/'
       RACK_REQUEST_ENV = 'rack.request'
